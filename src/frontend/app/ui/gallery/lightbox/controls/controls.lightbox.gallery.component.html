@@ -1,7 +1,7 @@
 <div id="controllers-container"
      [ngClass]="(controllersDimmed && !controllersAlwaysOn) ? (activePhoto && activePhoto.gridMedia.isVideo() ? 'dim-controls-video' :'dim-controls'):  ''"
      #root>
-  <div class="controls-caption" *ngIf="Title">{{Title}}</div>
+  <!-- <div class="controls-caption" *ngIf="Title">{{Title}}</div> -->
   <div class="controls controls-top">
     <a class="highlight control-button"
        *ngIf="activePhoto"
