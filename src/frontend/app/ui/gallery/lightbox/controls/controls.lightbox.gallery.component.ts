@@ -38,7 +38,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   @Input() photoFrameDim = {width: 1, height: 1, aspect: 1};
 
   public readonly facesEnabled = Config.Client.Faces.enabled;
-
   public zoom = 1;
   public playBackState: PlayBackStates = PlayBackStates.Paused;
   public PlayBackStates = PlayBackStates;
@@ -53,6 +52,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   private prevDrag = {x: 0, y: 0};
   private prevZoom = 1;
   private faceContainerDim = {width: 0, height: 0};
+  private ctrlDown = false;
 
   constructor(public fullScreenService: FullScreenService) {
   }
@@ -133,16 +133,27 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 
-  wheel($event: { deltaY: number }) {
+  wheel($event: { deltaX: number, deltaY: number,  isFinal: boolean}) {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
-    if ($event.deltaY < 0) {
-      this.zoomIn();
+    if(this.ctrlDown) {
+      if ($event.deltaY < 0) {
+        this.zoomIn();
+      } else {
+        this.zoomOut();
+      }
     } else {
-      this.zoomOut();
+      this.drag.x = this.prevDrag.x - $event.deltaX;
+      this.drag.y = this.prevDrag.y - $event.deltaY;
+        this.prevDrag = {
+          x: this.drag.x,
+          y: this.drag.y,
+        };
     }
+    this.checkZoomAndDrag();
   }
+
 
   @HostListener('pinch', ['$event'])
   pinch($event: { scale: number }) {
@@ -177,7 +188,9 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       this.prevZoom = this.zoom;
       return;
     } else {
-      this.Zoom = 5;
+      const sz = this.activePhoto.gridMedia.media.metadata.size
+      const imElem = this.mediaElement.elementRef.nativeElement.querySelector("img"); 
+      this.Zoom = (sz.height)/(imElem.height);
       this.prevZoom = this.zoom;
       return;
     }
@@ -192,7 +205,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.showControls();
     this.Zoom = this.zoom - this.zoom / 10;
   }
-
 
   @HostListener('window:keydown', ['$event'])
   onKeyPress(e: KeyboardEvent) {
@@ -234,9 +246,21 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
           this.mediaElement.playPause();
         }
         break;
+      case 'Control':
+        this.ctrlDown=true;
+        break;
     }
   }
 
+  @HostListener('window:keyup', ['$event'])
+  onKeyUp(e: KeyboardEvent) {
+    const event: KeyboardEvent = window.event ? <any>window.event : e;
+    switch (event.key) {
+      case 'Control':
+        this.ctrlDown=false;
+        break;
+    }
+  }
 
   public play() {
     this.pause();
