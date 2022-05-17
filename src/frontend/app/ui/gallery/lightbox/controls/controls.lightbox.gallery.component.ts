@@ -69,6 +69,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   private prevDrag = { x: 0, y: 0 };
   private prevZoom = 1;
   private ctrlDown = false;
+  private mouse = { x: 0, y: 0 };
 
   constructor(
     public fullScreenService: FullScreenService,
@@ -100,6 +101,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.drag.y = (this.drag.y / this.zoom) * zoom;
     this.prevDrag.x = this.drag.x;
     this.prevDrag.y = this.drag.y;
+    console.log(this.drag.x, this.drag.y, this.mouse.x, this.mouse.y);
     this.zoom = zoom;
     this.showControls();
     this.checkZoomAndDrag();
@@ -134,6 +136,20 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
 
   ngOnChanges(): void {
     this.updateFaceContainerDim();
+  }
+
+  mousemove($event: {
+    offsetX: number;
+    offsetY: number;
+    clientX: number;
+    clientY: number;
+  }): void {
+    const divWidth = this.photoFrameDim.width / 2;
+    const divHeight = this.photoFrameDim.height / 2;
+
+    this.mouse.x = -($event.offsetX - divWidth) * this.zoom;
+    this.mouse.y = -($event.offsetY - divHeight) * this.zoom;
+    console.log(this.drag.x, this.drag.y, this.mouse.x, this.mouse.y);
   }
 
   pan($event: { deltaY: number; deltaX: number; isFinal: boolean }): void {
@@ -212,6 +228,10 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       const sz = this.activePhoto.gridMedia.media.metadata.size;
       const imElem =
         this.mediaElement.elementRef.nativeElement.querySelector('img');
+      this.drag.x = this.mouse.x;
+      this.drag.y = this.mouse.y;
+      this.prevDrag.x = this.drag.x;
+      this.prevDrag.y = this.drag.y;
       this.Zoom = sz.height / imElem.height;
       this.prevZoom = this.zoom;
       return;
@@ -376,7 +396,16 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
         width: (widthFilled ? divWidth : divHeight * photoAspect) * this.zoom,
         height: (widthFilled ? divWidth / photoAspect : divHeight) * this.zoom,
       };
-
+      // console.log(
+      //   photoAspect,
+      //   this.photoFrameDim,
+      //   widthFilled,
+      //   divHeight,
+      //   divWidth,
+      //   size,
+      //   size.width / this.zoom,
+      //   size.height / this.zoom
+      // );
       const widthDrag = Math.abs(divWidth - size.width) / 2;
       const heightDrag = Math.abs(divHeight - size.height) / 2;
 

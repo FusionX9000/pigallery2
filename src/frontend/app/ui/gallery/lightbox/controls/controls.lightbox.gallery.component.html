@@ -48,7 +48,8 @@
        (tap)="tap($event)"
        (pan)="pan($any($event))"
        (wheel)="wheel($event)"
-       (click)="mediaElement.playPause()">
+       (click)="mediaElement.playPause()"
+       (mousemove)="mousemove($event)">
 
     <div class="faces-container"
          [style.top.px]="photoFrameDim.height/2 + drag.y"
