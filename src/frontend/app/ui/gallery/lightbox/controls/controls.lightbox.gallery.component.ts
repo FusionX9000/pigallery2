@@ -68,8 +68,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   private timerSub: Subscription;
   private prevDrag = { x: 0, y: 0 };
   private prevZoom = 1;
-  private faceContainerDim = {width: 0, height: 0};
   private ctrlDown = false;
+  private mouse = { x: 0, y: 0 };
 
   constructor(
     public fullScreenService: FullScreenService,
@@ -97,10 +97,12 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       return;
     }
     this.pause();
+
     this.drag.x = (this.drag.x / this.zoom) * zoom;
     this.drag.y = (this.drag.y / this.zoom) * zoom;
     this.prevDrag.x = this.drag.x;
     this.prevDrag.y = this.drag.y;
+
     this.zoom = zoom;
     this.showControls();
     this.checkZoomAndDrag();
@@ -137,6 +139,17 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.updateFaceContainerDim();
   }
 
+  mousemove($event: {
+    offsetX: number;
+    offsetY: number;
+  }): void {
+    const divWidth = this.photoFrameDim.width / 2;
+    const divHeight = this.photoFrameDim.height / 2;
+
+    this.mouse.x = -($event.offsetX - divWidth) * this.zoom;
+    this.mouse.y = -($event.offsetY - divHeight) * this.zoom;
+  }
+
   pan($event: { deltaY: number; deltaX: number; isFinal: boolean }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
@@ -156,11 +169,11 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 
-  wheel($event: { deltaX: number, deltaY: number,  isFinal: boolean}) {
+  wheel($event: { deltaX: number; deltaY: number }) {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
-    if(this.ctrlDown) {
+    if (this.ctrlDown) {
       if ($event.deltaY < 0) {
         this.zoomIn();
       } else {
@@ -169,14 +182,13 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     } else {
       this.drag.x = this.prevDrag.x - $event.deltaX;
       this.drag.y = this.prevDrag.y - $event.deltaY;
-        this.prevDrag = {
-          x: this.drag.x,
-          y: this.drag.y,
-        };
+      this.prevDrag = {
+        x: this.drag.x,
+        y: this.drag.y,
+      };
     }
     this.checkZoomAndDrag();
   }
-
 
   @HostListener('pinch', ['$event'])
   pinch($event: { scale: number }): void {
@@ -211,9 +223,14 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       this.prevZoom = this.zoom;
       return;
     } else {
-      const sz = this.activePhoto.gridMedia.media.metadata.size
-      const imElem = this.mediaElement.elementRef.nativeElement.querySelector("img"); 
-      this.Zoom = (sz.height)/(imElem.height);
+      const sz = this.activePhoto.gridMedia.media.metadata.size;
+      const imElem =
+        this.mediaElement.elementRef.nativeElement.querySelector('img');
+      this.drag.x = this.mouse.x;
+      this.drag.y = this.mouse.y;
+      this.prevDrag.x = this.drag.x;
+      this.prevDrag.y = this.drag.y;
+      this.Zoom = sz.height / imElem.height;
       this.prevZoom = this.zoom;
       return;
     }
@@ -269,7 +286,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
         }
         break;
       case 'Control':
-        this.ctrlDown=true;
+        this.ctrlDown = true;
         break;
     }
   }
@@ -279,7 +296,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     const event: KeyboardEvent = window.event ? <any>window.event : e;
     switch (event.key) {
       case 'Control':
-        this.ctrlDown=false;
+        this.ctrlDown = false;
         break;
     }
   }
@@ -377,7 +394,16 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
         width: (widthFilled ? divWidth : divHeight * photoAspect) * this.zoom,
         height: (widthFilled ? divWidth / photoAspect : divHeight) * this.zoom,
       };
-
+      // console.log(
+      //   photoAspect,
+      //   this.photoFrameDim,
+      //   widthFilled,
+      //   divHeight,
+      //   divWidth,
+      //   size,
+      //   size.width / this.zoom,
+      //   size.height / this.zoom
+      // );
       const widthDrag = Math.abs(divWidth - size.width) / 2;
       const heightDrag = Math.abs(divHeight - size.height) / 2;
 
@@ -441,4 +467,3 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 }
-
