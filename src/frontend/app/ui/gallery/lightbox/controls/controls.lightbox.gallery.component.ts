@@ -68,7 +68,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   private timerSub: Subscription;
   private prevDrag = { x: 0, y: 0 };
   private prevZoom = 1;
-  private faceContainerDim = {width: 0, height: 0};
   private ctrlDown = false;
 
   constructor(
@@ -156,11 +155,11 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 
-  wheel($event: { deltaX: number, deltaY: number,  isFinal: boolean}) {
+  wheel($event: { deltaX: number; deltaY: number }) {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
-    if(this.ctrlDown) {
+    if (this.ctrlDown) {
       if ($event.deltaY < 0) {
         this.zoomIn();
       } else {
@@ -169,14 +168,13 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     } else {
       this.drag.x = this.prevDrag.x - $event.deltaX;
       this.drag.y = this.prevDrag.y - $event.deltaY;
-        this.prevDrag = {
-          x: this.drag.x,
-          y: this.drag.y,
-        };
+      this.prevDrag = {
+        x: this.drag.x,
+        y: this.drag.y,
+      };
     }
     this.checkZoomAndDrag();
   }
-
 
   @HostListener('pinch', ['$event'])
   pinch($event: { scale: number }): void {
@@ -211,9 +209,10 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       this.prevZoom = this.zoom;
       return;
     } else {
-      const sz = this.activePhoto.gridMedia.media.metadata.size
-      const imElem = this.mediaElement.elementRef.nativeElement.querySelector("img"); 
-      this.Zoom = (sz.height)/(imElem.height);
+      const sz = this.activePhoto.gridMedia.media.metadata.size;
+      const imElem =
+        this.mediaElement.elementRef.nativeElement.querySelector('img');
+      this.Zoom = sz.height / imElem.height;
       this.prevZoom = this.zoom;
       return;
     }
@@ -269,7 +268,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
         }
         break;
       case 'Control':
-        this.ctrlDown=true;
+        this.ctrlDown = true;
         break;
     }
   }
@@ -279,7 +278,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     const event: KeyboardEvent = window.event ? <any>window.event : e;
     switch (event.key) {
       case 'Control':
-        this.ctrlDown=false;
+        this.ctrlDown = false;
         break;
     }
   }
@@ -441,4 +440,3 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 }
-
