@@ -1,4 +1,4 @@
-/* tslint:disable:no-inferrable-types */
+/* eslint-disable @typescript-eslint/no-inferrable-types */
 import 'reflect-metadata';
 import {ClientConfig} from '../public/ClientConfig';
 import {ServerConfig} from './PrivateConfig';
@@ -12,8 +12,8 @@ export class WebConfig {
   State: any;
 
   @ConfigProperty()
-  Server: ServerConfig.Config = new ServerConfig.Config();
+  Server: ServerConfig = new ServerConfig();
   @ConfigProperty()
-  Client: ClientConfig.Config = new ClientConfig.Config();
+  Client: ClientConfig = new ClientConfig();
 
 }

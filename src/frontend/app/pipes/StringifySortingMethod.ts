@@ -1,25 +1,25 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {I18n} from '@ngx-translate/i18n-polyfill';
-import {SortingMethods} from '../../../common/entities/SortingMethods';
+import { Pipe, PipeTransform } from '@angular/core';
+import { SortingMethods } from '../../../common/entities/SortingMethods';
 
-
-@Pipe({name: 'stringifySorting'})
+@Pipe({ name: 'stringifySorting' })
 export class StringifySortingMethod implements PipeTransform {
-  constructor(private i18n: I18n) {
-  }
 
   transform(method: SortingMethods): string {
     switch (method) {
+      case SortingMethods.ascRating:
+        return $localize`ascending rating`;
+      case SortingMethods.descRating:
+        return $localize`descending rating`;
       case SortingMethods.ascName:
-        return this.i18n('ascending name');
+        return $localize`ascending name`;
       case SortingMethods.descName:
-        return this.i18n('descending name');
+        return $localize`descending name`;
       case SortingMethods.ascDate:
-        return this.i18n('ascending date');
+        return $localize`ascending date`;
       case SortingMethods.descDate:
-        return this.i18n('descending date');
+        return $localize`descending date`;
       case SortingMethods.random:
-        return this.i18n('random');
+        return $localize`random`;
     }
   }
 }

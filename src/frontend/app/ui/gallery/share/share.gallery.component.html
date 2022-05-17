@@ -1,4 +1,5 @@
 <button id="shareButton" class="nav-link btn  btn-link"
+        style="white-space:nowrap"
         type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
   <span class="oi oi-share"></span>
   <ng-container i18n>Share</ng-container>
@@ -8,8 +9,7 @@
   <!-- sharing Modal-->
   <div class="modal-header">
     <h5 class="modal-title" i18n>Share</h5>
-    <button type="button" class="close" (click)="hideModal()" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
+    <button type="button"  class="btn-close"  (click)="hideModal()" data-dismiss="modal" aria-label="Close">
     </button>
   </div>
   <div class="modal-body">
@@ -49,7 +49,7 @@
 
       <div class="row">
         <div class="col-4">
-          <label class="control-label" for="includeSubfolders"  i18n>Include subfolders:</label>
+          <label class="control-label" for="includeSubfolders" i18n>Include subfolders:</label>
         </div>
         <div class="col-8">
           <bSwitch
@@ -71,7 +71,8 @@
       <div class="row">
         <div class="col-4">
           <label class="control-label" for="share-password">
-            <ng-container i18n>Password</ng-container>*:
+            <ng-container i18n>Password</ng-container>
+            *:
           </label>
         </div>
         <div class="col-8" *ngIf="passwordProtection">
@@ -95,16 +96,18 @@
           <input class="form-control" [(ngModel)]="input.valid.amount" (change)="update()"
                  name="valid-from"
                  id="valid-from"
-                 type="number" min="0" step="1"/>
+                 [disabled]="input.valid.type === ValidityTypes.Forever"
+                 type="number" min="1" step="1"/>
         </div>
         <div class="col-4" style="padding-left: 1px">
-          <select class="form-control"
+          <select class="form-select"
                   [(ngModel)]="input.valid.type" (change)="update()" name="valid-to"
                   required>
             <option [ngValue]="ValidityTypes.Minutes" i18n>Minutes</option>
             <option [ngValue]="ValidityTypes.Hours" i18n>Hours</option>
             <option [ngValue]="ValidityTypes.Days" i18n>Days</option>
             <option [ngValue]="ValidityTypes.Months" i18n>Months</option>
+            <option [ngValue]="ValidityTypes.Forever" i18n>Forever</option>
           </select>
         </div>
       </div>

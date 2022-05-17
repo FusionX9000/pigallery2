@@ -4,226 +4,154 @@ These results are created mostly for development, but the results are public for
 
 You can also run it on your files by using the [docker-compose.yml](docker-compose) file.
 
-## PiGallery2 v1.8.2, 31.12.2020
+See all benchmark results in [HISTORY.md](HISTORY.md)
+
+## PiGallery2 v1.9.3, 22.03.2022
+**Version**: v1.9.3, built at: Mon Mar 21 2022 21:40:36 GMT+0000 (Coordinated Universal Time), git commit:6394eb4f86f119fd36de9fd06295c9345fc02a33
 **System**: Raspberry Pi 4 4G Model B, SandisK Mobile Ultra 32Gb CLass10, UHS-I, HDD: Western Digital Elements 1TB (WDBUZG0010BBK)
 
-**OS**: Raspbian GNU/Linux 10 (buster)
-
-**Gallery**: directories: 31, photos: 2036, videos: 35, diskUsage : 22.08GB, persons : 1241, unique persons (faces): 14
+**Gallery**: directories: 31, photos: 2036, videos: 35, diskUsage : 22.08GB, persons : 1381, unique persons (faces): 25
 
 | Action | Sub action | Average Duration | Result  |
 |:------:|:----------:|:----------------:|:-------:|
-| **Scanning directory** | | **10231.7 ms** | **media: 698, directories:0** |
-| **Saving directory to DB** | | **3070.8 ms** | **-** |
-| **List directory** | | **332.2 ms** | **media: 698, directories:0** |
+| **Scanning directory** | | **10915.9 ms** | **media: 698, directories: 0, size: 266.29KB** |
+| **Saving directory to DB** | | **1789.6 ms** | **-** |
+| **List directory** | | **326.9 ms** | **media: 698, directories: 0, size: 284.60KB** |
 | | Authenticate | 0.1 ms | - |
 | | Normalize path param | 0.0 ms | - |
 | | Authorise path | 0.0 ms | - |
-| | Inject gallery version | 11.5 ms | - |
-| | List directory | 243.7 ms | media: 698, directories:0 |
-| | Add thumbnail information | 60.5 ms | media: 698, directories:0 |
-| | Clean up gallery results | 16.1 ms | media: 698, directories:0 |
-| | Render result | 0.0 ms | media: 698, directories:0 |
-| **Listing Faces** | | **335.6 ms** | **items: 14** |
+| | Inject gallery version | 2.7 ms | - |
+| | List directory | 252.2 ms | media: 698, directories: 0, size: 429.46KB |
+| | Add thumbnail information | 53.8 ms | media: 698, directories: 0, size: 429.46KB |
+| | Clean up gallery results | 17.7 ms | media: 698, directories: 0, size: 284.60KB |
+| | Add server timing | 0.1 ms | media: 698, directories: 0, size: 284.60KB |
+| | Render result | 0.0 ms | media: 698, directories: 0, size: 284.60KB |
+| **Listing Faces** | | **41.7 ms** | **items: 25, size: 2.20KB** |
 | | Authenticate | 0.1 ms | - |
 | | Authorise | 0.0 ms | - |
-| | Inject gallery version | 6.1 ms | - |
-| | List persons | 1.6 ms | items: 14 |
-| | Add sample photo for all | 326.4 ms | items: 14 |
-| | Add thumbnail info for persons | 1.0 ms | items: 14 |
-| | Remove sample photo for all | 0.1 ms | items: 14 |
-| | Render result | 0.0 ms | items: 14 |
-| **Searching for `a` as `directory`** | | **858.0 ms** | **media: 1679, directories:21** |
-| | Authenticate | 0.1 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.2 ms | - |
-| | Search | 668.4 ms | media: 1679, directories:21 |
-| | Add thumbnail information | 150.5 ms | media: 1679, directories:21 |
-| | Clean up gallery results | 38.6 ms | media: 1679, directories:21 |
-| | Render result | 0.0 ms | media: 1679, directories:21 |
-| **Searching for `a` as `person`** | | **475.8 ms** | **media: 768, directories:21** |
+| | Inject gallery version | 2.8 ms | - |
+| | List persons | 35.1 ms | items: 25, size: 22.06KB |
+| | Add thumbnail info for persons | 1.7 ms | items: 25, size: 22.63KB |
+| | Clean up person results | 1.7 ms | items: 25, size: 2.20KB |
+| | Add server timing | 0.1 ms | items: 25, size: 2.20KB |
+| | Render result | 0.0 ms | items: 25, size: 2.20KB |
+| **Searching for `a`** | | **787.5 ms** | **media: 2001, directories: 0, size: 1.16MB** |
 | | Authenticate | 0.1 ms | - |
 | | Authorise | 0.0 ms | - |
 | | Inject gallery version | 0.2 ms | - |
-| | Search | 386.5 ms | media: 768, directories:21 |
-| | Add thumbnail information | 68.6 ms | media: 768, directories:21 |
-| | Clean up gallery results | 20.2 ms | media: 768, directories:21 |
-| | Render result | 0.0 ms | media: 768, directories:21 |
-| **Searching for `a` as `keyword`** | | **760.8 ms** | **media: 1534, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.2 ms | - |
-| | Search | 589.3 ms | media: 1534, directories:21 |
-| | Add thumbnail information | 136.9 ms | media: 1534, directories:21 |
-| | Clean up gallery results | 33.9 ms | media: 1534, directories:21 |
-| | Render result | 0.0 ms | media: 1534, directories:21 |
-| **Searching for `a` as `position`** | | **625.5 ms** | **media: 1133, directories:21** |
+| | Search | 580.8 ms | media: 2001, directories: 0, size: 1.43MB |
+| | Add thumbnail information | 159.6 ms | media: 2001, directories: 0, size: 1.43MB |
+| | Clean up gallery results | 46.5 ms | media: 2001, directories: 0, size: 1.16MB |
+| | Add server timing | 0.1 ms | media: 2001, directories: 0, size: 1.16MB |
+| | Render result | 0.0 ms | media: 2001, directories: 0, size: 1.16MB |
+| **Searching for `caption:a`** | | **11.1 ms** | **media: 0, directories: 0, size: 104.00B** |
 | | Authenticate | 0.1 ms | - |
 | | Authorise | 0.0 ms | - |
 | | Inject gallery version | 0.2 ms | - |
-| | Search | 499.7 ms | media: 1133, directories:21 |
-| | Add thumbnail information | 102.4 ms | media: 1133, directories:21 |
-| | Clean up gallery results | 22.6 ms | media: 1133, directories:21 |
-| | Render result | 0.0 ms | media: 1133, directories:21 |
-| **Searching for `a` as `photo`** | | **46.2 ms** | **media: 65, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.2 ms | - |
-| | Search | 38.2 ms | media: 65, directories:21 |
-| | Add thumbnail information | 5.9 ms | media: 65, directories:21 |
-| | Clean up gallery results | 1.7 ms | media: 65, directories:21 |
-| | Render result | 0.0 ms | media: 65, directories:21 |
-| **Searching for `a` as `video`** | | **19.9 ms** | **media: 14, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Search | 18.0 ms | media: 14, directories:21 |
-| | Add thumbnail information | 1.3 ms | media: 14, directories:21 |
-| | Clean up gallery results | 0.2 ms | media: 14, directories:21 |
-| | Render result | 0.0 ms | media: 14, directories:21 |
-| **Searching for `a` as `any`** | | **1038.2 ms** | **media: 2001, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.2 ms | - |
-| | Search | 814.9 ms | media: 2001, directories:21 |
-| | Add thumbnail information | 180.0 ms | media: 2001, directories:21 |
-| | Clean up gallery results | 42.8 ms | media: 2001, directories:21 |
-| | Render result | 0.0 ms | media: 2001, directories:21 |
-| **Instant search for `a`** | | **25.1 ms** | **media: 10, directories:10** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Instant search | 23.5 ms | media: 10, directories:10 |
-| | Add thumbnail information | 0.9 ms | media: 10, directories:10 |
-| | Clean up gallery results | 0.3 ms | media: 10, directories:10 |
-| | Render result | 0.0 ms | media: 10, directories:10 |
-| **Auto complete for `a`** | | **21.8 ms** | **items: 35** |
+| | Search | 10.5 ms | media: 0, directories: 0, size: 104.00B |
+| | Add thumbnail information | 0.1 ms | media: 0, directories: 0, size: 104.00B |
+| | Clean up gallery results | 0.0 ms | media: 0, directories: 0, size: 104.00B |
+| | Add server timing | 0.0 ms | media: 0, directories: 0, size: 104.00B |
+| | Render result | 0.0 ms | media: 0, directories: 0, size: 104.00B |
+| **Searching for `directory:a`** | | **665.5 ms** | **media: 1705, directories: 0, size: 937.45KB** |
 | | Authenticate | 0.1 ms | - |
 | | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Autocomplete | 21.4 ms | items: 35 |
-| | Render result | 0.0 ms | items: 35 |
-*Measurements run 50 times, and an average was calculated.
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 490.3 ms | media: 1705, directories: 0, size: 1.20MB |
+| | Add thumbnail information | 135.2 ms | media: 1705, directories: 0, size: 1.20MB |
+| | Clean up gallery results | 39.5 ms | media: 1705, directories: 0, size: 937.45KB |
+| | Add server timing | 0.1 ms | media: 1705, directories: 0, size: 937.45KB |
+| | Render result | 0.0 ms | media: 1705, directories: 0, size: 937.45KB |
+| **Searching for `file-name:a`** | | **42.6 ms** | **media: 79, directories: 0, size: 19.10KB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 33.9 ms | media: 79, directories: 0, size: 44.65KB |
+| | Add thumbnail information | 6.3 ms | media: 79, directories: 0, size: 44.65KB |
+| | Clean up gallery results | 1.9 ms | media: 79, directories: 0, size: 19.10KB |
+| | Add server timing | 0.1 ms | media: 79, directories: 0, size: 19.10KB |
+| | Render result | 0.0 ms | media: 79, directories: 0, size: 19.10KB |
+| **Searching for `keyword:a`** | | **615.6 ms** | **media: 1536, directories: 0, size: 864.26KB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 458.4 ms | media: 1536, directories: 0, size: 1.08MB |
+| | Add thumbnail information | 120.9 ms | media: 1536, directories: 0, size: 1.08MB |
+| | Clean up gallery results | 35.7 ms | media: 1536, directories: 0, size: 864.26KB |
+| | Add server timing | 0.1 ms | media: 1536, directories: 0, size: 864.26KB |
+| | Render result | 0.0 ms | media: 1536, directories: 0, size: 864.26KB |
+| **Searching for `person:a`** | | **345.3 ms** | **media: 825, directories: 0, size: 558.95KB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 259.2 ms | media: 825, directories: 0, size: 657.60KB |
+| | Add thumbnail information | 65.1 ms | media: 825, directories: 0, size: 657.60KB |
+| | Clean up gallery results | 20.5 ms | media: 825, directories: 0, size: 558.95KB |
+| | Add server timing | 0.1 ms | media: 825, directories: 0, size: 558.95KB |
+| | Render result | 0.0 ms | media: 825, directories: 0, size: 558.95KB |
+| **Searching for `position:a`** | | **462.3 ms** | **media: 1133, directories: 0, size: 757.51KB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 346.9 ms | media: 1133, directories: 0, size: 855.88KB |
+| | Add thumbnail information | 89.3 ms | media: 1133, directories: 0, size: 855.88KB |
+| | Clean up gallery results | 25.5 ms | media: 1133, directories: 0, size: 757.51KB |
+| | Add server timing | 0.1 ms | media: 1133, directories: 0, size: 757.51KB |
+| | Render result | 0.0 ms | media: 1133, directories: 0, size: 757.51KB |
+| **Searching for `.`** | | **784.8 ms** | **media: 2001, directories: 0, size: 1.15MB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 580.6 ms | media: 2001, directories: 0, size: 1.43MB |
+| | Add thumbnail information | 157.5 ms | media: 2001, directories: 0, size: 1.43MB |
+| | Clean up gallery results | 46.2 ms | media: 2001, directories: 0, size: 1.15MB |
+| | Add server timing | 0.1 ms | media: 2001, directories: 0, size: 1.15MB |
+| | Render result | 0.0 ms | media: 2001, directories: 0, size: 1.15MB |
+| **Searching for `<Most common name>`** | | **124.5 ms** | **media: 262, directories: 0, size: 182.97KB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 94.7 ms | media: 262, directories: 0, size: 211.22KB |
+| | Add thumbnail information | 21.9 ms | media: 262, directories: 0, size: 211.22KB |
+| | Clean up gallery results | 7.3 ms | media: 262, directories: 0, size: 182.97KB |
+| | Add server timing | 0.1 ms | media: 262, directories: 0, size: 182.97KB |
+| | Render result | 0.0 ms | media: 262, directories: 0, size: 182.97KB |
+| **Searching for `<Most AND second common names>`** | | **26.8 ms** | **media: 20, directories: 0, size: 18.03KB** |
+| | Authenticate | 0.0 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 24.0 ms | media: 20, directories: 0, size: 19.70KB |
+| | Add thumbnail information | 1.7 ms | media: 20, directories: 0, size: 19.70KB |
+| | Clean up gallery results | 0.6 ms | media: 20, directories: 0, size: 18.03KB |
+| | Add server timing | 0.1 ms | media: 20, directories: 0, size: 18.03KB |
+| | Render result | 0.0 ms | media: 20, directories: 0, size: 18.03KB |
+| **Searching for `<Most OR second common names>`** | | **198.3 ms** | **media: 448, directories: 0, size: 311.45KB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 150.0 ms | media: 448, directories: 0, size: 366.49KB |
+| | Add thumbnail information | 36.0 ms | media: 448, directories: 0, size: 366.49KB |
+| | Clean up gallery results | 11.8 ms | media: 448, directories: 0, size: 311.45KB |
+| | Add server timing | 0.1 ms | media: 448, directories: 0, size: 311.45KB |
+| | Render result | 0.0 ms | media: 448, directories: 0, size: 311.45KB |
+| **Searching for `<Contain at least 2 out of all names>`** | | **364.0 ms** | **media: 323, directories: 0, size: 248.34KB** |
+| | Authenticate | 0.1 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Search | 326.4 ms | media: 323, directories: 0, size: 284.36KB |
+| | Add thumbnail information | 27.2 ms | media: 323, directories: 0, size: 284.36KB |
+| | Clean up gallery results | 9.8 ms | media: 323, directories: 0, size: 248.34KB |
+| | Add server timing | 0.1 ms | media: 323, directories: 0, size: 248.34KB |
+| | Render result | 0.0 ms | media: 323, directories: 0, size: 248.34KB |
+| **Auto complete for `a`** | | **13.5 ms** | **items: 24, size: 979.00B** |
+| | Authenticate | 0.0 ms | - |
+| | Authorise | 0.0 ms | - |
+| | Inject gallery version | 0.2 ms | - |
+| | Autocomplete | 13.0 ms | items: 24, size: 979.00B |
+| | Add server timing | 0.1 ms | items: 24, size: 979.00B |
+| | Render result | 0.0 ms | items: 24, size: 979.00B |
+
+*Measurements run 20 times and an average was calculated.
+Full runtime: 1522539.0ms
 
 
-## PiGallery2 v1.8.2, 31.12.2020
-**System**: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz, 16GB Ram, SHDD: 1TB, 5400 rpm
-
-**OS**: Windows 10, build: 19041.685
-
-**Gallery**: directories: 31, photos: 2036, videos: 35, diskUsage : 22.08GB, persons : 1241, unique persons (faces): 14
-
-| Action | Sub action | Average Duration | Result  |
-|:------:|:----------:|:----------------:|:-------:|
-| **Scanning directory** | | **2357.2 ms** | **media: 698, directories:0** |
-| **Saving directory to DB** | | **1033.1 ms** | **-** |
-| **List directory** | | **115.3 ms** | **media: 698, directories:0** |
-| | Authenticate | 0.0 ms | - |
-| | Normalize path param | 0.0 ms | - |
-| | Authorise path | 0.0 ms | - |
-| | Inject gallery version | 2.0 ms | - |
-| | List directory | 58.8 ms | media: 698, directories:0 |
-| | Add thumbnail information | 50.5 ms | media: 698, directories:0 |
-| | Clean up gallery results | 4.0 ms | media: 698, directories:0 |
-| | Render result | 0.0 ms | media: 698, directories:0 |
-| **Listing Faces** | | **79.1 ms** | **items: 14** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 1.8 ms | - |
-| | List persons | 0.6 ms | items: 14 |
-| | Add sample photo for all | 76.0 ms | items: 14 |
-| | Add thumbnail info for persons | 0.5 ms | items: 14 |
-| | Remove sample photo for all | 0.0 ms | items: 14 |
-| | Render result | 0.0 ms | items: 14 |
-| **Searching for `a` as `directory`** | | **272.8 ms** | **media: 1679, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Search | 150.1 ms | media: 1679, directories:21 |
-| | Add thumbnail information | 113.6 ms | media: 1679, directories:21 |
-| | Clean up gallery results | 8.9 ms | media: 1679, directories:21 |
-| | Render result | 0.0 ms | media: 1679, directories:21 |
-| **Searching for `a` as `person`** | | **145.0 ms** | **media: 768, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Search | 89.2 ms | media: 768, directories:21 |
-| | Add thumbnail information | 51.3 ms | media: 768, directories:21 |
-| | Clean up gallery results | 4.4 ms | media: 768, directories:21 |
-| | Render result | 0.0 ms | media: 768, directories:21 |
-| **Searching for `a` as `keyword`** | | **243.1 ms** | **media: 1534, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Search | 132.1 ms | media: 1534, directories:21 |
-| | Add thumbnail information | 102.6 ms | media: 1534, directories:21 |
-| | Clean up gallery results | 8.2 ms | media: 1534, directories:21 |
-| | Render result | 0.0 ms | media: 1534, directories:21 |
-| **Searching for `a` as `position`** | | **195.9 ms** | **media: 1133, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Search | 113.1 ms | media: 1133, directories:21 |
-| | Add thumbnail information | 77.1 ms | media: 1133, directories:21 |
-| | Clean up gallery results | 5.5 ms | media: 1133, directories:21 |
-| | Render result | 0.0 ms | media: 1133, directories:21 |
-| **Searching for `a` as `photo`** | | **14.8 ms** | **media: 65, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.0 ms | - |
-| | Search | 9.7 ms | media: 65, directories:21 |
-| | Add thumbnail information | 4.5 ms | media: 65, directories:21 |
-| | Clean up gallery results | 0.4 ms | media: 65, directories:21 |
-| | Render result | 0.0 ms | media: 65, directories:21 |
-| **Searching for `a` as `video`** | | **6.5 ms** | **media: 14, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.0 ms | - |
-| | Search | 5.3 ms | media: 14, directories:21 |
-| | Add thumbnail information | 1.0 ms | media: 14, directories:21 |
-| | Clean up gallery results | 0.1 ms | media: 14, directories:21 |
-| | Render result | 0.0 ms | media: 14, directories:21 |
-| **Searching for `a` as `any`** | | **330.6 ms** | **media: 2001, directories:21** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.1 ms | - |
-| | Search | 185.8 ms | media: 2001, directories:21 |
-| | Add thumbnail information | 133.9 ms | media: 2001, directories:21 |
-| | Clean up gallery results | 10.7 ms | media: 2001, directories:21 |
-| | Render result | 0.0 ms | media: 2001, directories:21 |
-| **Instant search for `a`** | | **7.4 ms** | **media: 10, directories:10** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.0 ms | - |
-| | Instant search | 6.5 ms | media: 10, directories:10 |
-| | Add thumbnail information | 0.8 ms | media: 10, directories:10 |
-| | Clean up gallery results | 0.1 ms | media: 10, directories:10 |
-| | Render result | 0.0 ms | media: 10, directories:10 |
-| **Auto complete for `a`** | | **8.3 ms** | **items: 35** |
-| | Authenticate | 0.0 ms | - |
-| | Authorise | 0.0 ms | - |
-| | Inject gallery version | 0.0 ms | - |
-| | Autocomplete | 8.2 ms | items: 35 |
-| | Render result | 0.0 ms | items: 35 |
-*Measurements run 50 times, and an average was calculated.
-
-
-## PiGallery2 v1.5.8, 26.01.2019
-
-**System**: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz, 16GB Ram, SHDD: 1TB, 5400 rpm
-**Gallery**: directories: 0 media: 341, faces: 39
-
-| action | action details | average time | details |
-|:------:|:--------------:|:------------:|:-------:|
-| Scanning directory |  | 2486.5ms | media: 341, directories:0 |
-| Saving directory |  | 780.0ms | - |
-| Listing Directory |  | 31.5ms | media: 341, directories:0 |
-| searching | `a` as `directory` | 2.9ms | - |
-| searching | `a` as `person` | 7.3ms | media: 39, directories:0 |
-| searching | `a` as `keyword` | 30.8ms | media: 339, directories:0 |
-| searching | `a` as `position` | 25.7ms | media: 282, directories:0 |
-| searching | `a` as `photo` | 2.8ms | - |
-| searching | `a` as `video` | 2.6ms | - |
-| searching | `a` as `any` | 33.0ms | media: 339, directories:0 |
-| instant search | `a` | 6.1ms | media: 10, directories:0 |
-| auto complete | `a` | 5.4ms | items: 10 | 

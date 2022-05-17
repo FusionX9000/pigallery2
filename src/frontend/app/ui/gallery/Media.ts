@@ -1,74 +1,94 @@
-import {Utils} from '../../../../common/Utils';
-import {MediaIcon} from './MediaIcon';
-import {Config} from '../../../../common/config/public/Config';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
+import { Utils } from '../../../../common/Utils';
+import { MediaIcon } from './MediaIcon';
+import { Config } from '../../../../common/config/public/Config';
+import { MediaDTO, MediaDTOUtils } from '../../../../common/entities/MediaDTO';
 
 export class Media extends MediaIcon {
+  static readonly sortedThumbnailSizes =
+    Config.Client.Media.Thumbnail.thumbnailSizes.sort((a, b): number => a - b);
 
-  static readonly sortedThumbnailSizes = Config.Client.Media.Thumbnail.thumbnailSizes
-    .sort((a, b) => a - b);
-
-  constructor(media: MediaDTO, public renderWidth: number, public renderHeight: number) {
+  constructor(
+    media: MediaDTO,
+    public renderWidth: number,
+    public renderHeight: number
+  ) {
     super(media);
   }
 
-
-  thumbnailLoaded() {
+  thumbnailLoaded(): void {
     if (!this.isThumbnailAvailable()) {
-      this.media.readyThumbnails = this.media.readyThumbnails || [];
-      this.media.readyThumbnails.push(this.getThumbnailSize());
+      this.media.missingThumbnails = this.media.missingThumbnails || 0;
+      this.media.missingThumbnails -=
+        MediaIcon.ThumbnailMap[this.getThumbnailSize()];
+      if (this.media.missingThumbnails < 0) {
+        throw new Error('missingThumbnails got below 0');
+      }
     }
   }
 
-  getThumbnailSize() {
+  getThumbnailSize(): number {
     const longerEdge = Math.max(this.renderWidth, this.renderHeight);
     return Utils.findClosestinSorted(longerEdge, Media.sortedThumbnailSizes);
   }
 
   getReplacementThumbnailSize(): number {
-
     if (this.replacementSizeCache === false) {
       this.replacementSizeCache = null;
 
       const size = this.getThumbnailSize();
-      if (!!this.media.readyThumbnails) {
-        for (let i = 0; i < this.media.readyThumbnails.length; i++) {
-          if (this.media.readyThumbnails[i] < size) {
-            this.replacementSizeCache = this.media.readyThumbnails[i];
+      if (this.media.missingThumbnails) {
+        for (const thSize of Config.Client.Media.Thumbnail.thumbnailSizes) {
+          // eslint-disable-next-line no-bitwise
+          if (
+            (this.media.missingThumbnails & MediaIcon.ThumbnailMap[thSize]) ===
+              0 &&
+            thSize < size
+          ) {
+            this.replacementSizeCache = thSize;
             break;
           }
         }
       }
     }
-    return <number>this.replacementSizeCache;
+    return this.replacementSizeCache as number;
   }
 
-  isReplacementThumbnailAvailable() {
+  isReplacementThumbnailAvailable(): boolean {
     return this.getReplacementThumbnailSize() !== null;
   }
 
-  isThumbnailAvailable() {
-    return this.media.readyThumbnails && this.media.readyThumbnails.indexOf(this.getThumbnailSize()) !== -1;
+  isThumbnailAvailable(): boolean {
+    // eslint-disable-next-line no-bitwise
+    return (
+      (this.media.missingThumbnails &
+        MediaIcon.ThumbnailMap[this.getThumbnailSize()]) ===
+      0
+    );
   }
 
-  getReplacementThumbnailPath() {
+  getReplacementThumbnailPath(): string {
     const size = this.getReplacementThumbnailSize();
-    return Utils.concatUrls(Config.Client.urlBase,
+    return Utils.concatUrls(
+      Config.Client.urlBase,
       '/api/gallery/content/',
-      this.media.directory.path, this.media.directory.name, this.media.name, 'thumbnail', size.toString());
-
+      this.getRelativePath(),
+      'thumbnail',
+      size.toString()
+    );
   }
 
   hasPositionData(): boolean {
-    return MediaDTO.hasPositionData(this.media);
+    return MediaDTOUtils.hasPositionData(this.media);
   }
 
-  getThumbnailPath() {
+  getThumbnailPath(): string {
     const size = this.getThumbnailSize();
-    return Utils.concatUrls(Config.Client.urlBase,
+    return Utils.concatUrls(
+      Config.Client.urlBase,
       '/api/gallery/content/',
-      this.media.directory.path, this.media.directory.name, this.media.name, 'thumbnail', size.toString());
+      this.getRelativePath(),
+      'thumbnail',
+      size.toString()
+    );
   }
-
-
 }

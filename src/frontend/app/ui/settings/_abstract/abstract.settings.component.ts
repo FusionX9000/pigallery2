@@ -1,23 +1,30 @@
-import {Input, OnChanges, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {AuthenticationService} from '../../../model/network/authentication.service';
-import {UserRoles} from '../../../../../common/entities/UserDTO';
-import {Utils} from '../../../../../common/Utils';
-import {ErrorDTO} from '../../../../../common/entities/Error';
-import {NotificationService} from '../../../model/notification.service';
-import {NavigationService} from '../../../model/navigation.service';
-import {AbstractSettingsService} from './abstract.settings.service';
-import {I18n} from '@ngx-translate/i18n-polyfill';
-import {Subscription} from 'rxjs';
-import {ISettingsComponent} from './ISettingsComponent';
-import {WebConfig} from '../../../../../common/config/private/WebConfig';
-import {FormControl} from '@angular/forms';
+import {
+  Directive,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { AuthenticationService } from '../../../model/network/authentication.service';
+import { UserRoles } from '../../../../../common/entities/UserDTO';
+import { Utils } from '../../../../../common/Utils';
+import { ErrorDTO } from '../../../../../common/entities/Error';
+import { NotificationService } from '../../../model/notification.service';
+import { NavigationService } from '../../../model/navigation.service';
+import { AbstractSettingsService } from './abstract.settings.service';
+import { Subscription } from 'rxjs';
+import { ISettingsComponent } from './ISettingsComponent';
+import { WebConfig } from '../../../../../common/config/private/WebConfig';
+import { FormControl } from '@angular/forms';
 
-interface ConfigState {
-  value: any;
-  original: any;
-  default: any;
-  readonly: any;
-  onChange: any;
+interface ConfigState<T = unknown> {
+  value: T;
+  original: T;
+  default: T;
+  readonly: boolean;
+  onChange: ()=>unknown;
   isEnumType: boolean;
   isConfigType: boolean;
 }
@@ -34,15 +41,17 @@ interface RecursiveState extends ConfigState {
   [key: string]: RecursiveState;
 }
 
-export abstract class SettingsComponent<T extends { [key: string]: any }, S extends AbstractSettingsService<T> = AbstractSettingsService<T>>
-  implements OnInit, OnDestroy, OnChanges, ISettingsComponent {
-
+@Directive()
+export abstract class SettingsComponentDirective<
+  T extends { [key: string]: any },
+  S extends AbstractSettingsService<T> = AbstractSettingsService<T>
+> implements OnInit, OnDestroy, OnChanges, ISettingsComponent
+{
   @Input()
   public simplifiedMode = true;
 
-  @ViewChild('settingsForm', {static: true})
+  @ViewChild('settingsForm', { static: true })
   form: FormControl;
-
 
   @Output()
   hasAvailableSettings = true;
@@ -50,25 +59,27 @@ export abstract class SettingsComponent<T extends { [key: string]: any }, S exte
   public inProgress = false;
   public error: string = null;
   public changed = false;
-  public states: RecursiveState = <any>{};
+  public states: RecursiveState = {} as RecursiveState;
 
+  private subscription: Subscription = null;
+  private readonly settingsSubscription: Subscription = null;
 
-  private _subscription: Subscription = null;
-  private readonly _settingsSubscription: Subscription = null;
-
-  protected constructor(private name: string,
-                        protected _authService: AuthenticationService,
-                        private _navigation: NavigationService,
-                        public _settingsService: S,
-                        protected notification: NotificationService,
-                        public i18n: I18n,
-                        private sliceFN?: (s: WebConfig) => T) {
+  protected constructor(
+    private name: string,
+    public icon: string,
+    protected authService: AuthenticationService,
+    private navigation: NavigationService,
+    public settingsService: S,
+    protected notification: NotificationService,
+    private sliceFN?: (s: WebConfig) => T
+  ) {
     if (this.sliceFN) {
-      this._settingsSubscription = this._settingsService.Settings.subscribe(this.onNewSettings);
-      this.onNewSettings(this._settingsService._settingsService.settings.value);
+      this.settingsSubscription = this.settingsService.Settings.subscribe(
+        this.onNewSettings
+      );
+      this.onNewSettings(this.settingsService.settingsService.settings.value);
     }
   }
-
 
   get Name(): string {
     return this.changed ? this.name + '*' : this.name;
@@ -83,8 +94,7 @@ export abstract class SettingsComponent<T extends { [key: string]: any }, S exte
   }
 
   onNewSettings = (s: WebConfig) => {
-
-    this.states = Utils.clone(<any>this.sliceFN(s.State));
+    this.states = Utils.clone(this.sliceFN(s.State) as any);
     const addOriginal = (obj: any) => {
       for (const k of Object.keys(obj)) {
         if (typeof obj[k].value === 'undefined') {
@@ -113,8 +123,7 @@ export abstract class SettingsComponent<T extends { [key: string]: any }, S exte
       return false;
     }
     const keys = Object.keys(newSettings);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
+    for (const key of keys) {
       if (typeof original[key] === 'undefined') {
         console.warn('unknown settings: ' + key);
         return false;
@@ -143,9 +152,10 @@ export abstract class SettingsComponent<T extends { [key: string]: any }, S exte
         if (typeof state.original !== 'undefined') {
           return state.value === state.original;
         }
+
         const keys = Object.keys(state);
-        for (let i = 0; i < keys.length; i++) {
-          const key = keys[i];
+
+        for (const key of keys) {
           if (settingsSame(state[key]) === false) {
             return false;
           }
@@ -158,49 +168,55 @@ export abstract class SettingsComponent<T extends { [key: string]: any }, S exte
     }, 0);
   };
 
-  ngOnInit() {
-    if (!this._authService.isAuthenticated() ||
-      this._authService.user.value.role < UserRoles.Admin) {
-      this._navigation.toLogin();
+  ngOnInit(): void {
+    if (
+      !this.authService.isAuthenticated() ||
+      this.authService.user.value.role < UserRoles.Admin
+    ) {
+      this.navigation.toLogin();
       return;
     }
     this.getSettings();
 
     // TODO: fix after this issue is fixed: https://github.com/angular/angular/issues/24818
-    this._subscription = this.form.valueChanges.subscribe(() => {
+    this.subscription = this.form.valueChanges.subscribe(() => {
       this.onOptionChange();
     });
   }
 
   ngOnChanges(): void {
-    this.hasAvailableSettings = ((this._settingsService.isSupported() &&
-      this._settingsService.showInSimplifiedMode())
-      || !this.simplifiedMode);
+    this.hasAvailableSettings =
+      (this.settingsService.isSupported() &&
+        this.settingsService.showInSimplifiedMode()) ||
+      !this.simplifiedMode;
   }
 
-
-  ngOnDestroy() {
-    if (this._subscription != null) {
-      this._subscription.unsubscribe();
+  ngOnDestroy(): void {
+    if (this.subscription != null) {
+      this.subscription.unsubscribe();
     }
-    if (this._settingsSubscription != null) {
-      this._settingsSubscription.unsubscribe();
+    if (this.settingsSubscription != null) {
+      this.settingsSubscription.unsubscribe();
     }
   }
 
-  public reset() {
+  public reset(): void {
     this.getSettings();
   }
 
   stateToSettings(): T {
-    const ret: T = <any>{};
+    const ret: T = {} as T;
 
-    const add = (obj: any, to: any): void => {
+    const add = (obj: Record<string, RecursiveState>, to: Record<string, RecursiveState>): void => {
       for (const key of Object.keys(obj)) {
-        to[key] = {};
-        if (obj[key].isConfigType || (typeof obj[key] === 'object' && typeof obj[key].value === 'undefined')) {
-           add(obj[key], to[key]);
-           continue;
+        to[key] = {} as RecursiveState;
+        if (
+          obj[key].isConfigType ||
+          (typeof obj[key] === 'object' &&
+            typeof obj[key].value === 'undefined')
+        ) {
+          add(obj[key], to[key]);
+          continue;
         }
         to[key] = obj[key].value;
       }
@@ -208,22 +224,24 @@ export abstract class SettingsComponent<T extends { [key: string]: any }, S exte
     add(this.states, ret);
 
     return ret;
-
   }
 
-  public async save() {
+  public async save(): Promise<boolean> {
     this.inProgress = true;
     this.error = '';
     try {
-      await this._settingsService.updateSettings(this.stateToSettings());
+      await this.settingsService.updateSettings(this.stateToSettings());
       await this.getSettings();
-      this.notification.success(this.Name + ' ' + this.i18n('settings saved'), this.i18n('Success'));
+      this.notification.success(
+        this.Name + ' ' + $localize`settings saved`,
+        $localize`Success`
+      );
       this.inProgress = false;
       return true;
     } catch (err) {
       console.error(err);
       if (err.message) {
-        this.error = (<ErrorDTO>err).message;
+        this.error = (err as ErrorDTO).message;
       }
     }
 
@@ -231,9 +249,8 @@ export abstract class SettingsComponent<T extends { [key: string]: any }, S exte
     return false;
   }
 
-
-  private async getSettings() {
-    await this._settingsService.getSettings();
+  private async getSettings(): Promise<void> {
+    await this.settingsService.getSettings();
     this.changed = false;
   }
 }

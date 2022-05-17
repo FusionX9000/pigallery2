@@ -1,22 +1,10 @@
-import {DirectoryDTO} from '../../../../common/entities/DirectoryDTO';
-import {PhotoDTO} from '../../../../common/entities/PhotoDTO';
-import {OrientationType} from '../../../../common/entities/RandomQueryDTO';
+import { ParentDirectoryDTO } from '../../../../common/entities/DirectoryDTO';
+import { IObjectManager } from './IObjectManager';
 
-export interface RandomQuery {
-  directory?: string;
-  recursive?: boolean;
-  orientation?: OrientationType;
-  fromDate?: Date;
-  toDate?: Date;
-  minResolution?: number;
-  maxResolution?: number;
-}
-
-export interface IGalleryManager {
-  listDirectory(relativeDirectoryName: string,
-                knownLastModified?: number,
-                knownLastScanned?: number): Promise<DirectoryDTO>;
-
-  getRandomPhoto(queryFilter: RandomQuery): Promise<PhotoDTO>;
-
+export interface IGalleryManager extends IObjectManager {
+  listDirectory(
+    relativeDirectoryName: string,
+    knownLastModified?: number,
+    knownLastScanned?: number
+  ): Promise<ParentDirectoryDTO>;
 }

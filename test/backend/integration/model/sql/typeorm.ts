@@ -7,16 +7,15 @@ import {UserEntity} from '../../../../../src/backend/model/database/sql/enitites
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {PasswordHelper} from '../../../../../src/backend/model/PasswordHelper';
 import {DirectoryEntity} from '../../../../../src/backend/model/database/sql/enitites/DirectoryEntity';
+import {PhotoEntity, PhotoMetadataEntity} from '../../../../../src/backend/model/database/sql/enitites/PhotoEntity';
 import {
   CameraMetadataEntity,
   GPSMetadataEntity,
-  PhotoEntity,
-  PhotoMetadataEntity,
+  MediaDimensionEntity,
   PositionMetaDataEntity
-} from '../../../../../src/backend/model/database/sql/enitites/PhotoEntity';
-import {MediaDimensionEntity} from '../../../../../src/backend/model/database/sql/enitites/MediaEntity';
+} from '../../../../../src/backend/model/database/sql/enitites/MediaEntity';
 import {VersionEntity} from '../../../../../src/backend/model/database/sql/enitites/VersionEntity';
-import {ServerConfig} from '../../../../../src/common/config/private/PrivateConfig';
+import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 
 
@@ -25,9 +24,9 @@ describe('Typeorm integration', () => {
 
   const tempDir = path.join(__dirname, '../../tmp');
   const setUpSqlDB = async () => {
-    await fs.promises.rmdir(tempDir, {recursive: true});
+    await fs.promises.rm(tempDir, {recursive: true, force: true});
 
-    Config.Server.Database.type = ServerConfig.DatabaseType.sqlite;
+    Config.Server.Database.type = DatabaseType.sqlite;
     Config.Server.Database.dbFolder = tempDir;
     ProjectPath.reset();
 
@@ -35,7 +34,7 @@ describe('Typeorm integration', () => {
 
   const teardownUpSqlDB = async () => {
     await SQLConnection.close();
-    await fs.promises.rmdir(tempDir, {recursive: true});
+    await fs.promises.rm(tempDir, {recursive: true});
   };
 
   beforeEach(async () => {
@@ -66,7 +65,6 @@ describe('Typeorm integration', () => {
     sd.height = 200;
     sd.width = 200;
     const gps = new GPSMetadataEntity();
-    gps.altitude = 1;
     gps.latitude = 1;
     gps.longitude = 1;
     const pd = new PositionMetaDataEntity();
@@ -106,14 +104,14 @@ describe('Typeorm integration', () => {
     a.role = UserRoles.Admin;
     await conn.getRepository(UserEntity).save(a);
 
-    const version = await conn.getRepository(VersionEntity).findOne();
+    const version = (await conn.getRepository(VersionEntity).find())[0];
     version.version--;
     await conn.getRepository(VersionEntity).save(version);
 
     await SQLConnection.close();
 
     const conn2 = await SQLConnection.getConnection();
-    const admins = await conn2.getRepository(UserEntity).find({name: 'migrated admin'});
+    const admins = await conn2.getRepository(UserEntity).findBy({name: 'migrated admin'});
     expect(admins.length).to.be.equal(1);
   });
 

@@ -1,25 +1,23 @@
-import {SettingsService} from '../settings.service';
+import { BehaviorSubject } from 'rxjs';
+import { SettingsService } from '../settings.service';
+import { WebConfig } from '../../../../../common/config/private/WebConfig';
 
 export abstract class AbstractSettingsService<T> {
+  protected constructor(public settingsService: SettingsService) {}
 
-  protected constructor(public _settingsService: SettingsService) {
-
+  get Settings(): BehaviorSubject<WebConfig> {
+    return this.settingsService.settings;
   }
-
-  get Settings() {
-    return this._settingsService.settings;
-  }
-
 
   public getSettings(): Promise<void> {
-    return this._settingsService.getSettings();
+    return this.settingsService.getSettings();
   }
 
   public showInSimplifiedMode(): boolean {
     return true;
   }
 
-  isSupported() {
+  isSupported(): boolean {
     return true;
   }
 

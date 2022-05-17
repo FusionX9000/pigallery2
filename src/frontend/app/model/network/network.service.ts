@@ -1,25 +1,25 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpResponse} from '@angular/common/http';
-import {Message} from '../../../../common/entities/Message';
-import {SlimLoadingBarService} from 'ng2-slim-loading-bar';
-import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
-import {Config} from '../../../../common/config/public/Config';
-import {Utils} from '../../../../common/Utils';
-import {CustomHeaders} from '../../../../common/CustomHeaders';
-import {VersionService} from '../version.service';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { Message } from '../../../../common/entities/Message';
+import { LoadingBarService } from '@ngx-loading-bar/core';
+import { ErrorCodes, ErrorDTO } from '../../../../common/entities/Error';
+import { Config } from '../../../../common/config/public/Config';
+import { Utils } from '../../../../common/Utils';
+import { CustomHeaders } from '../../../../common/CustomHeaders';
+import { VersionService } from '../version.service';
 
 @Injectable()
 export class NetworkService {
-
-  readonly _apiBaseUrl = Utils.concatUrls(Config.Client.urlBase, '/api');
+  readonly apiBaseUrl = Utils.concatUrls(Config.Client.urlBase, '/api');
   private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];
 
-  constructor(private _http: HttpClient,
-              private slimLoadingBarService: SlimLoadingBarService,
-              private versionService: VersionService) {
-  }
+  constructor(
+    private http: HttpClient,
+    private loadingBarService: LoadingBarService,
+    private versionService: VersionService
+  ) {}
 
-  public static buildUrl(url: string, data?: { [key: string]: any }) {
+  public static buildUrl(url: string, data?: { [key: string]: any }): string {
     if (data) {
       const keys = Object.getOwnPropertyNames(data);
       if (keys.length > 0) {
@@ -36,34 +36,51 @@ export class NetworkService {
   }
 
   public getXML<T>(url: string): Promise<Document> {
-
-    this.slimLoadingBarService.visible = true;
-    this.slimLoadingBarService.start(() => {
-      this.slimLoadingBarService.visible = false;
-    });
+    this.loadingBarService.useRef().start();
 
     const process = (res: string): Document => {
-      this.slimLoadingBarService.complete();
+      this.loadingBarService.useRef().complete();
       const parser = new DOMParser();
       return parser.parseFromString(res, 'text/xml');
     };
 
     const err = (error: any) => {
-      this.slimLoadingBarService.complete();
+      this.loadingBarService.useRef().complete();
       return this.handleError(error);
     };
 
-    return this._http.get(this._apiBaseUrl + url, {responseType: 'text'})
+    return this.http
+      .get(this.apiBaseUrl + url, { responseType: 'text' })
       .toPromise()
       .then(process)
       .catch(err);
   }
 
-  public postJson<T>(url: string, data: any = {}): Promise<T> {
+  public getText<T>(url: string): Promise<string> {
+    this.loadingBarService.useRef().start();
+
+    const process = (res: string): string => {
+      this.loadingBarService.useRef().complete();
+      return res;
+    };
+
+    const err = (error: Error) => {
+      this.loadingBarService.useRef().complete();
+      return this.handleError(error);
+    };
+
+    return this.http
+      .get(this.apiBaseUrl + url, { responseType: 'text' })
+      .toPromise()
+      .then(process)
+      .catch(err);
+  }
+
+  public postJson<T>(url: string, data = {}): Promise<T> {
     return this.callJson('post', url, data);
   }
 
-  public putJson<T>(url: string, data: any = {}): Promise<T> {
+  public putJson<T>(url: string, data = {}): Promise<T> {
     return this.callJson('put', url, data);
   }
 
@@ -75,69 +92,77 @@ export class NetworkService {
     return this.callJson('delete', url);
   }
 
-  addGlobalErrorHandler(fn: (error: ErrorDTO) => boolean) {
+  addGlobalErrorHandler(fn: (error: ErrorDTO) => boolean): void {
     this.globalErrorHandlers.push(fn);
   }
 
-  private callJson<T>(method: 'get' | 'post' | 'delete' | 'put', url: string, data: any = {}): Promise<T> {
+  private callJson<T>(
+    method: 'get' | 'post' | 'delete' | 'put',
+    url: string,
+    data = {}
+  ): Promise<T> {
     const body = data;
 
-    this.slimLoadingBarService.visible = true;
-    this.slimLoadingBarService.start(() => {
-      this.slimLoadingBarService.visible = false;
-    });
+    this.loadingBarService.useRef().start();
 
     const process = (res: HttpResponse<Message<T>>): T => {
-      this.slimLoadingBarService.complete();
+      this.loadingBarService.useRef().complete();
       const msg = res.body;
       if (res.headers.has(CustomHeaders.dataVersion)) {
-        this.versionService.onNewVersion(res.headers.get(CustomHeaders.dataVersion));
+        this.versionService.onNewVersion(
+          res.headers.get(CustomHeaders.dataVersion)
+        );
       }
-      if (!!msg.error) {
+      if (msg.error) {
         if (msg.error.code) {
-          (<any>msg.error)['title'] = ErrorCodes[msg.error.code];
+          (msg.error as any).title = ErrorCodes[msg.error.code];
         }
         throw msg.error;
       }
       return msg.result;
     };
 
-    const err = (error: any) => {
-      this.slimLoadingBarService.complete();
+    const err = (error: Error) => {
+      this.loadingBarService.useRef().complete();
       return this.handleError(error);
     };
 
     switch (method) {
       case 'get':
-        return this._http.get<Message<T>>(this._apiBaseUrl + url, {observe: 'response'})
+        return this.http
+          .get<Message<T>>(this.apiBaseUrl + url, { observe: 'response' })
           .toPromise()
           .then(process)
           .catch(err);
       case 'delete':
-        return this._http.delete<Message<T>>(this._apiBaseUrl + url, {observe: 'response'})
+        return this.http
+          .delete<Message<T>>(this.apiBaseUrl + url, { observe: 'response' })
           .toPromise()
           .then(process)
           .catch(err);
       case 'post':
-        return this._http.post<Message<T>>(this._apiBaseUrl + url, body, {observe: 'response'})
+        return this.http
+          .post<Message<T>>(this.apiBaseUrl + url, body, {
+            observe: 'response',
+          })
           .toPromise()
           .then(process)
           .catch(err);
       case 'put':
-        return this._http.put<Message<T>>(this._apiBaseUrl + url, body, {observe: 'response'})
+        return this.http
+          .put<Message<T>>(this.apiBaseUrl + url, body, { observe: 'response' })
           .toPromise()
           .then(process)
           .catch(err);
       default:
         throw new Error('Unknown method');
     }
-
   }
 
-  private handleError(error: any) {
+  private handleError(error: any): Promise<any> {
     if (typeof error.code !== 'undefined') {
-      for (let i = 0; i < this.globalErrorHandlers.length; i++) {
-        if (this.globalErrorHandlers[i](error) === true) {
+      for (const item of this.globalErrorHandlers) {
+        if (item(error) === true) {
           return;
         }
       }

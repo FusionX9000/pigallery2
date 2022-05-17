@@ -1,30 +1,29 @@
-import {Injectable} from '@angular/core';
-import {Event} from '../../../../common/event/Event';
-import {PageHelper} from '../../model/page.helper';
+import { Injectable } from '@angular/core';
+import { Event } from '../../../../common/event/Event';
+import { PageHelper } from '../../model/page.helper';
 
 @Injectable()
 export class OverlayService {
-
   OnOverlayChange = new Event<boolean>();
   private scrollWidth: number = null;
 
-  public showOverlay() {
+  public showOverlay(): void {
     // disable scrolling
     PageHelper.hideScrollY();
     this.OnOverlayChange.trigger(true);
   }
 
-  public hideOverlay() {
+  public hideOverlay(): void {
     PageHelper.showScrollY();
     this.OnOverlayChange.trigger(false);
   }
 
-  getScrollbarWidth() {
+  getScrollbarWidth(): number {
     if (this.scrollWidth == null) {
       const outer = document.createElement('div');
       outer.style.visibility = 'hidden';
       outer.style.width = '100px';
-      outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+      (outer.style as any).msOverflowStyle = 'scrollbar'; // needed for WinJS apps
 
       document.body.appendChild(outer);
 
@@ -47,11 +46,10 @@ export class OverlayService {
     return this.scrollWidth;
   }
 
-  getPhantomScrollbarWidth() {
+  getPhantomScrollbarWidth(): number {
     if (!PageHelper.isScrollYVisible()) {
       return this.getScrollbarWidth();
     }
     return 0;
   }
-
 }

@@ -7,7 +7,7 @@ import * as path from 'path';
 
 describe('VideoProcessing', () => {
 
-  // tslint:disable:no-unused-expression
+  /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
   it('should generate converted file path', async () => {
 
     ProjectPath.ImageFolder = path.join(__dirname, './../../../assets');
@@ -27,17 +27,17 @@ describe('VideoProcessing', () => {
     }
     {
       const convertedPath = VideoProcessing.generateConvertedFilePath(videoPath);
-      Config.Server.Media.Video.transcoding.codec = <any>'codec_text';
+      Config.Server.Media.Video.transcoding.codec = 'codec_text' as any;
       expect(await VideoProcessing.isValidConvertedPath(convertedPath)).to.be.false;
     }
     {
       const convertedPath = VideoProcessing.generateConvertedFilePath(videoPath);
-      Config.Server.Media.Video.transcoding.format = <any>'format_test';
+      Config.Server.Media.Video.transcoding.format = 'format_test' as any;
       expect(await VideoProcessing.isValidConvertedPath(convertedPath)).to.be.false;
     }
     {
       const convertedPath = VideoProcessing.generateConvertedFilePath(videoPath);
-      Config.Server.Media.Video.transcoding.resolution = <any>1;
+      Config.Server.Media.Video.transcoding.resolution = 1 as any;
       expect(await VideoProcessing.isValidConvertedPath(convertedPath)).to.be.false;
     }
   });

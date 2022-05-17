@@ -1,14 +1,17 @@
-import {DirectoryDTO} from './DirectoryDTO';
-import {OrientationTypes} from 'ts-exif-parser';
-import {MediaDimension, MediaDTO, MediaMetadata} from './MediaDTO';
+import { DirectoryPathDTO } from './DirectoryDTO';
+import { MediaDimension, MediaDTO, MediaMetadata } from './MediaDTO';
 
-export interface PhotoDTO extends MediaDTO {
+export interface PreviewPhotoDTO extends MediaDTO {
+  name: string;
+  directory: DirectoryPathDTO;
+}
+
+export interface PhotoDTO extends PreviewPhotoDTO, MediaDTO {
   id: number;
   name: string;
-  directory: DirectoryDTO;
+  directory: DirectoryPathDTO;
   metadata: PhotoMetadata;
-  readyThumbnails: Array<number>;
-  readyIcon: boolean;
+  missingThumbnails?: number;
 }
 
 export interface FaceRegionBox {
@@ -29,13 +32,11 @@ export interface PhotoMetadata extends MediaMetadata {
   keywords?: string[];
   cameraData?: CameraMetadata;
   positionData?: PositionMetaData;
-  orientation: OrientationTypes;
   size: MediaDimension;
   creationDate: number;
   fileSize: number;
   faces?: FaceRegion[];
 }
-
 
 export interface PositionMetaData {
   GPSData?: GPSMetadata;
@@ -45,18 +46,16 @@ export interface PositionMetaData {
 }
 
 export interface GPSMetadata {
-  latitude?: number;
-  longitude?: number;
-  altitude?: number;
+  latitude?: number; // float with precision: 6
+  longitude?: number; // float with precision: 6
 }
-
 
 export interface CameraMetadata {
   ISO?: number;
   model?: string;
   make?: string;
-  fStop?: number;
-  exposure?: number;
+  fStop?: number; // float with precision: 2
+  exposure?: number; // float with precision: 4
   focalLength?: number;
   lens?: string;
 }

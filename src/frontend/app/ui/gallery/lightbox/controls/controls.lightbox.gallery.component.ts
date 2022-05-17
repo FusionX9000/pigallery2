@@ -1,18 +1,34 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {MediaDTO} from '../../../../../../common/entities/MediaDTO';
-import {FullScreenService} from '../../fullscreen.service';
-import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
-import {Observable, Subscription, timer} from 'rxjs';
-import {filter} from 'rxjs/operators';
-import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
-import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
-import {SearchTypes} from '../../../../../../common/entities/AutoCompleteItem';
-import {Config} from '../../../../../../common/config/public/Config';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { MediaDTOUtils } from '../../../../../../common/entities/MediaDTO';
+import { FullScreenService } from '../../fullscreen.service';
+import { GalleryPhotoComponent } from '../../grid/photo/photo.grid.gallery.component';
+import { Observable, Subscription, timer } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { PhotoDTO } from '../../../../../../common/entities/PhotoDTO';
+import { GalleryLightboxMediaComponent } from '../media/media.lightbox.gallery.component';
+import { Config } from '../../../../../../common/config/public/Config';
+import {
+  SearchQueryTypes,
+  TextSearch,
+  TextSearchQueryMatchTypes,
+} from '../../../../../../common/entities/SearchQueryDTO';
+import { AuthenticationService } from '../../../../model/network/authentication.service';
 
 export enum PlayBackStates {
   Paused = 1,
   Play = 2,
-  FastForward = 3
+  FastForward = 3,
 }
 
 @Component({
@@ -21,10 +37,9 @@ export enum PlayBackStates {
   templateUrl: './controls.lightbox.gallery.component.html',
 })
 export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
-
   readonly MAX_ZOOM = 10;
 
-  @ViewChild('root', {static: false}) root: ElementRef;
+  @ViewChild('root', { static: false }) root: ElementRef;
 
   @Output() closed = new EventEmitter();
   @Output() toggleInfoPanel = new EventEmitter();
@@ -32,10 +47,10 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   @Output() nextPhoto = new EventEmitter();
   @Output() previousPhoto = new EventEmitter();
 
-  @Input() navigation = {hasPrev: true, hasNext: true};
+  @Input() navigation = { hasPrev: true, hasNext: true };
   @Input() activePhoto: GalleryPhotoComponent;
   @Input() mediaElement: GalleryLightboxMediaComponent;
-  @Input() photoFrameDim = {width: 1, height: 1, aspect: 1};
+  @Input() photoFrameDim = { width: 1, height: 1, aspect: 1 };
 
   public readonly facesEnabled = Config.Client.Faces.enabled;
   public zoom = 1;
@@ -44,17 +59,24 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   public controllersDimmed = false;
   public controllersAlwaysOn = false;
   public controllersVisible = true;
-  public drag = {x: 0, y: 0};
-  public SearchTypes = SearchTypes;
+  public drag = { x: 0, y: 0 };
+  public SearchQueryTypes = SearchQueryTypes;
+  public faceContainerDim = { width: 0, height: 0 };
+  public searchEnabled: boolean;
   private visibilityTimer: number = null;
   private timer: Observable<number>;
   private timerSub: Subscription;
-  private prevDrag = {x: 0, y: 0};
+  private prevDrag = { x: 0, y: 0 };
   private prevZoom = 1;
   private faceContainerDim = {width: 0, height: 0};
   private ctrlDown = false;
 
-  constructor(public fullScreenService: FullScreenService) {
+  constructor(
+    public fullScreenService: FullScreenService,
+    private authService: AuthenticationService
+  ) {
+    this.searchEnabled =
+      Config.Client.Search.enabled && this.authService.canSearch();
   }
 
   public get Zoom(): number {
@@ -75,11 +97,12 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       return;
     }
     this.pause();
-    this.drag.x = this.drag.x / this.zoom * zoom;
-    this.drag.y = this.drag.y / this.zoom * zoom;
+    this.drag.x = (this.drag.x / this.zoom) * zoom;
+    this.drag.y = (this.drag.y / this.zoom) * zoom;
     this.prevDrag.x = this.drag.x;
     this.prevDrag.y = this.drag.y;
     this.zoom = zoom;
+    this.showControls();
     this.checkZoomAndDrag();
   }
 
@@ -87,14 +110,14 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     if (!this.activePhoto) {
       return null;
     }
-    return (<PhotoDTO>this.activePhoto.gridMedia.media).metadata.caption;
+    return (this.activePhoto.gridMedia.media as PhotoDTO).metadata.caption;
   }
 
-  public containerWidth() {
+  public containerWidth(): void {
     return this.root.nativeElement.width;
   }
 
-  public containerHeight() {
+  public containerHeight(): void {
     return this.root.nativeElement.height;
   }
 
@@ -114,8 +137,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.updateFaceContainerDim();
   }
 
-
-  pan($event: { deltaY: number, deltaX: number, isFinal: boolean }) {
+  pan($event: { deltaY: number; deltaX: number; isFinal: boolean }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
@@ -124,6 +146,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
     this.drag.x = this.prevDrag.x + $event.deltaX;
     this.drag.y = this.prevDrag.y + $event.deltaY;
+    this.showControls();
     this.checkZoomAndDrag();
     if ($event.isFinal) {
       this.prevDrag = {
@@ -156,7 +179,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
 
 
   @HostListener('pinch', ['$event'])
-  pinch($event: { scale: number }) {
+  pinch($event: { scale: number }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
@@ -165,7 +188,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   }
 
   @HostListener('pinchend', ['$event'])
-  pinchend($event: { scale: number }) {
+  pinchend($event: { scale: number }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
@@ -174,7 +197,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.prevZoom = this.zoom;
   }
 
-  tap($event: any) {
+  tap($event: any): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
@@ -196,19 +219,18 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 
-  zoomIn() {
+  zoomIn(): void {
     this.showControls();
     this.Zoom = this.zoom + this.zoom / 10;
   }
 
-  zoomOut() {
+  zoomOut(): void {
     this.showControls();
     this.Zoom = this.zoom - this.zoom / 10;
   }
 
   @HostListener('window:keydown', ['$event'])
-  onKeyPress(e: KeyboardEvent) {
-    const event: KeyboardEvent = window.event ? <any>window.event : e;
+  onKeyPress(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowLeft':
         if (this.navigation.hasPrev) {
@@ -262,31 +284,38 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 
-  public play() {
+  public play(): void {
     this.pause();
-    this.timerSub = this.timer.pipe(filter(t => t % 2 === 0)).subscribe(() => {
-      if (this.mediaElement.imageLoadFinished === false) {
-        return;
-      }
-      // do not skip video if its playing
-      if (this.activePhoto && this.activePhoto.gridMedia.isVideo() &&
-        !this.mediaElement.Paused) {
-        return;
-      }
-      this.nextPhoto.emit();
-    });
+    this.timerSub = this.timer
+      .pipe(filter((t) => t % 2 === 0))
+      .subscribe(() => {
+        if (this.mediaElement.imageLoadFinished === false) {
+          return;
+        }
+        // do not skip video if its playing
+        if (
+          this.activePhoto &&
+          this.activePhoto.gridMedia.isVideo() &&
+          !this.mediaElement.Paused
+        ) {
+          return;
+        }
+        this.nextPhoto.emit();
+      });
     this.playBackState = PlayBackStates.Play;
   }
 
-
-  public fastForward() {
+  public fastForward(): void {
     this.pause();
     this.timerSub = this.timer.subscribe(() => {
       if (this.mediaElement.imageLoadFinished === false) {
         return;
       }
-      if (this.activePhoto && this.activePhoto.gridMedia.isVideo() &&
-        !this.mediaElement.Paused) {
+      if (
+        this.activePhoto &&
+        this.activePhoto.gridMedia.isVideo() &&
+        !this.mediaElement.Paused
+      ) {
         return;
       }
       this.nextPhoto.emit();
@@ -295,33 +324,40 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   }
 
   @HostListener('mousemove')
-  onMouseMove() {
+  onMouseMove(): void {
     this.showControls();
   }
 
-  public pause() {
+  public pause(): void {
     if (this.timerSub != null) {
       this.timerSub.unsubscribe();
     }
     this.playBackState = PlayBackStates.Paused;
   }
 
-
-  resetZoom() {
+  resetZoom(): void {
     this.Zoom = 1;
   }
 
-  onResize() {
+  onResize(): void {
     this.checkZoomAndDrag();
   }
 
-  public closeLightbox() {
+  public closeLightbox(): void {
     this.hideControls();
     this.closed.emit();
   }
 
-  private checkZoomAndDrag() {
-    const fixDrag = (drag: { x: number, y: number }) => {
+  getPersonSearchQuery(name: string): string {
+    return JSON.stringify({
+      type: SearchQueryTypes.person,
+      matchType: TextSearchQueryMatchTypes.exact_match,
+      text: name,
+    } as TextSearch);
+  }
+
+  private checkZoomAndDrag(): void {
+    const fixDrag = (drag: { x: number; y: number }) => {
       if (this.zoom === 1) {
         drag.y = 0;
         drag.x = 0;
@@ -331,15 +367,16 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
         return;
       }
 
-      const photoAspect = MediaDTO.calcAspectRatio(this.activePhoto.gridMedia.media);
+      const photoAspect = MediaDTOUtils.calcAspectRatio(
+        this.activePhoto.gridMedia.media
+      );
       const widthFilled = photoAspect > this.photoFrameDim.aspect;
       const divWidth = this.photoFrameDim.width;
       const divHeight = this.photoFrameDim.height;
       const size = {
         width: (widthFilled ? divWidth : divHeight * photoAspect) * this.zoom,
-        height: (widthFilled ? divWidth / photoAspect : divHeight) * this.zoom
+        height: (widthFilled ? divWidth / photoAspect : divHeight) * this.zoom,
       };
-
 
       const widthDrag = Math.abs(divWidth - size.width) / 2;
       const heightDrag = Math.abs(divHeight - size.height) / 2;
@@ -374,7 +411,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     fixDrag(this.prevDrag);
   }
 
-  private showControls() {
+  private showControls(): void {
     this.controllersDimmed = false;
     if (this.visibilityTimer != null) {
       clearTimeout(this.visibilityTimer);
@@ -386,13 +423,14 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.controllersDimmed = true;
   };
 
-  private updateFaceContainerDim() {
+  private updateFaceContainerDim(): void {
     if (!this.activePhoto) {
       return;
     }
 
-
-    const photoAspect = MediaDTO.calcAspectRatio(this.activePhoto.gridMedia.media);
+    const photoAspect = MediaDTOUtils.calcAspectRatio(
+      this.activePhoto.gridMedia.media
+    );
 
     if (photoAspect < this.photoFrameDim.aspect) {
       this.faceContainerDim.height = this.photoFrameDim.height;
@@ -402,6 +440,5 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       this.faceContainerDim.width = this.photoFrameDim.width;
     }
   }
-
 }
 

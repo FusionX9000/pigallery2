@@ -1,9 +1,11 @@
-import {ObjectManagers} from '../../ObjectManagers';
-import {Config} from '../../../../common/config/private/Config';
-import {ConfigTemplateEntry, DefaultsJobs} from '../../../../common/entities/job/JobDTO';
-import {Job} from './Job';
-import {ServerConfig} from '../../../../common/config/private/PrivateConfig';
-
+import { ObjectManagers } from '../../ObjectManagers';
+import { Config } from '../../../../common/config/private/Config';
+import {
+  ConfigTemplateEntry,
+  DefaultsJobs,
+} from '../../../../common/entities/job/JobDTO';
+import { Job } from './Job';
+import { DatabaseType } from '../../../../common/config/private/PrivateConfig';
 
 export class DBRestJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Database Reset']];
@@ -11,10 +13,11 @@ export class DBRestJob extends Job {
   protected readonly IsInstant = true;
 
   public get Supported(): boolean {
-    return Config.Server.Database.type !== ServerConfig.DatabaseType.memory;
+    return Config.Server.Database.type !== DatabaseType.memory;
   }
 
-  protected async init() {
+  protected async init(): Promise<void> {
+    // abstract function
   }
 
   protected async step(): Promise<boolean> {
@@ -23,6 +26,4 @@ export class DBRestJob extends Job {
     await ObjectManagers.getInstance().IndexingManager.resetDB();
     return false;
   }
-
-
 }

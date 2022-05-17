@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
 import {expect} from 'chai';
 import {AuthenticationMWs} from '../../../../../src/backend/middlewares/user/AuthenticationMWs';
 import {ErrorCodes, ErrorDTO} from '../../../../../src/common/entities/Error';
@@ -50,10 +51,10 @@ describe('Authentication middleware', () => {
         expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHENTICATED);
         done();
       };
-      AuthenticationMWs.authenticate(req, <any>{
+      AuthenticationMWs.authenticate(req, {
         status: () => {
         }
-      }, next);
+      } as any, next);
 
     });
   });
@@ -63,7 +64,7 @@ describe('Authentication middleware', () => {
 
     const req = {
       session: {
-        user: {permissions: <string[]>null}
+        user: {permissions: null as string[]}
       },
       sessionOptions: {},
       query: {},
@@ -77,22 +78,21 @@ describe('Authentication middleware', () => {
     const test = (relativePath: string): Promise<string | number> => {
       return new Promise((resolve) => {
         req.params.path = path.normalize(relativePath);
-        authoriseDirPath(<any>req, <any>{sendStatus: resolve}, () => {
+        authoriseDirPath(req as any, {sendStatus: resolve} as any, () => {
           resolve('ok');
         });
-        resolve();
       });
     };
 
     it('should catch unauthorized path usage', async () => {
-      req.session.user.permissions = [path.normalize('/sub/subsub')];
+      req.session['user'].permissions = [path.normalize('/sub/subsub')];
       expect(await test('/sub/subsub')).to.be.eql('ok');
       expect(await test('/test')).to.be.eql(403);
       expect(await test('/')).to.be.eql(403);
       expect(await test('/sub/test')).to.be.eql(403);
       expect(await test('/sub/subsub/test')).to.be.eql(403);
       expect(await test('/sub/subsub/test/test2')).to.be.eql(403);
-      req.session.user.permissions = [path.normalize('/sub/subsub'), path.normalize('/sub/subsub2')];
+      req.session['user'].permissions = [path.normalize('/sub/subsub'), path.normalize('/sub/subsub2')];
       expect(await test('/sub/subsub2')).to.be.eql('ok');
       expect(await test('/sub/subsub')).to.be.eql('ok');
       expect(await test('/test')).to.be.eql(403);
@@ -100,7 +100,7 @@ describe('Authentication middleware', () => {
       expect(await test('/sub/test')).to.be.eql(403);
       expect(await test('/sub/subsub/test')).to.be.eql(403);
       expect(await test('/sub/subsub2/test')).to.be.eql(403);
-      req.session.user.permissions = [path.normalize('/sub/subsub*')];
+      req.session['user'].permissions = [path.normalize('/sub/subsub*')];
       expect(await test('/b')).to.be.eql(403);
       expect(await test('/sub')).to.be.eql(403);
       expect(await test('/sub/subsub2')).to.be.eql(403);
@@ -253,11 +253,11 @@ describe('Authentication middleware', () => {
         expect(err.code).to.be.eql(ErrorCodes.CREDENTIAL_NOT_FOUND);
         done();
       };
-      ObjectManagers.getInstance().UserManager = <UserManager>{
+      ObjectManagers.getInstance().UserManager = {
         findOne: (filter): Promise<UserDTO> => {
           return Promise.reject(null);
         }
-      };
+      } as UserManager;
       AuthenticationMWs.login(req, null, next);
 
 
@@ -277,14 +277,14 @@ describe('Authentication middleware', () => {
       };
       const next: any = (err: ErrorDTO) => {
         expect(err).to.be.undefined;
-        expect(req.session.user).to.be.eql('test user');
+        expect(req.session['user']).to.be.eql('test user');
         done();
       };
-      ObjectManagers.getInstance().UserManager = <IUserManager>{
+      ObjectManagers.getInstance().UserManager = {
         findOne: (filter) => {
-          return Promise.resolve(<any>'test user');
+          return Promise.resolve('test user' as any);
         }
-      };
+      } as IUserManager;
       AuthenticationMWs.login(req, null, next);
 
 

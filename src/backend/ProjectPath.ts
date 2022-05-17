@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import {Config} from '../common/config/private/Config';
+import { Config } from '../common/config/private/Config';
 
 class ProjectPathClass {
   public Root: string;
@@ -15,7 +15,7 @@ class ProjectPathClass {
     this.reset();
   }
 
-  normalizeRelative(pathStr: string) {
+  normalizeRelative(pathStr: string): string {
     return path.join(pathStr, path.sep);
   }
 
@@ -27,7 +27,7 @@ class ProjectPathClass {
     return path.relative(this.ImageFolder, pathStr);
   }
 
-  reset() {
+  reset(): void {
     this.Root = path.join(__dirname, '/../../');
     this.FrontendFolder = path.join(this.Root, 'dist');
     this.ImageFolder = this.getAbsolutePath(Config.Server.Media.folder);
@@ -40,7 +40,6 @@ class ProjectPathClass {
     if (!fs.existsSync(this.TempFolder)) {
       fs.mkdirSync(this.TempFolder);
     }
-
   }
 }
 

@@ -7,7 +7,7 @@ import {PhotoProcessing} from '../../../../../src/backend/model/fileprocessing/P
 
 describe('PhotoProcessing', () => {
 
-  // tslint:disable:no-unused-expression
+  /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
   it('should generate converted file path', async () => {
 
     Config.load();
@@ -28,22 +28,21 @@ describe('PhotoProcessing', () => {
     {
       const convertedPath = PhotoProcessing.generateConvertedPath(photoPath,
         Config.Server.Media.Photo.Converting.resolution);
-      Config.Server.Media.Photo.Converting.resolution = <any>1;
+      Config.Server.Media.Photo.Converting.resolution = (1 as any);
       expect(await PhotoProcessing.isValidConvertedPath(convertedPath)).to.be.false;
     }
   });
 
-  // tslint:disable:no-unused-expression
+  /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
   it('should generate converted thumbnail path', async () => {
 
     Config.load();
-    Config.Server.Media.Photo.Converting.resolution = <any>null;
+    Config.Server.Media.Photo.Converting.resolution = (null as any);
     Config.Client.Media.Thumbnail.thumbnailSizes = [10, 20];
     ProjectPath.ImageFolder = path.join(__dirname, './../../../assets');
     const photoPath = path.join(ProjectPath.ImageFolder, 'test_png.png');
 
-    for (let i = 0; i < Config.Client.Media.Thumbnail.thumbnailSizes.length; ++i) {
-      const thSize = Config.Client.Media.Thumbnail.thumbnailSizes[i];
+    for (const thSize of Config.Client.Media.Thumbnail.thumbnailSizes) {
       expect(await PhotoProcessing
         .isValidConvertedPath(PhotoProcessing.generateConvertedPath(photoPath, thSize)))
         .to.be.true;

@@ -1,9 +1,11 @@
-import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
+import { UserDTO, UserRoles } from '../../../../common/entities/UserDTO';
+import { IObjectManager } from './IObjectManager';
+import { FindOptionsWhere } from 'typeorm';
 
-export interface IUserManager {
-  findOne(filter: any): Promise<UserDTO>;
+export interface IUserManager extends IObjectManager {
+  findOne(filter: FindOptionsWhere<UserDTO>): Promise<UserDTO>;
 
-  find(filter: any): Promise<UserDTO[]>;
+  find(filter: FindOptionsWhere<UserDTO>): Promise<UserDTO[]>;
 
   createUser(user: UserDTO): Promise<UserDTO>;
 
@@ -11,5 +13,4 @@ export interface IUserManager {
 
   changeRole(id: number, newRole: UserRoles): Promise<UserDTO>;
 
-  changePassword(request: any): Promise<void>;
 }

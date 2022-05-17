@@ -1,17 +1,14 @@
-import {Component, OnDestroy, OnInit, TemplateRef} from '@angular/core';
-import {Utils} from '../../../../../common/Utils';
-import {ShareService} from '../share.service';
-import {GalleryService} from '../gallery.service';
-import {ContentWrapper} from '../../../../../common/entities/ConentWrapper';
-import {SharingDTO} from '../../../../../common/entities/SharingDTO';
-import {Config} from '../../../../../common/config/public/Config';
-import {NotificationService} from '../../../model/notification.service';
-import {DirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
-import {I18n} from '@ngx-translate/i18n-polyfill';
-import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import {Subscription} from 'rxjs';
-
+import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
+import { Utils } from '../../../../../common/Utils';
+import { ShareService } from '../share.service';
+import { ContentService } from '../content.service';
+import { ContentWrapper } from '../../../../../common/entities/ConentWrapper';
+import { SharingDTO } from '../../../../../common/entities/SharingDTO';
+import { Config } from '../../../../../common/config/public/Config';
+import { NotificationService } from '../../../model/notification.service';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-gallery-share',
@@ -19,7 +16,6 @@ import {Subscription} from 'rxjs';
   styleUrls: ['./share.gallery.component.css'],
 })
 export class GalleryShareComponent implements OnInit, OnDestroy {
-
   enabled = true;
   url = '';
 
@@ -27,9 +23,9 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     includeSubfolders: true,
     valid: {
       amount: 30,
-      type: ValidityTypes.Days
+      type: ValidityTypes.Days as ValidityTypes,
     },
-    password: <string>null
+    password: null as string,
   };
   currentDir = '';
   sharing: SharingDTO = null;
@@ -41,37 +37,41 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
 
   text = {
     Yes: 'Yes',
-    No: 'No'
+    No: 'No',
   };
 
-  constructor(private _sharingService: ShareService,
-              public _galleryService: GalleryService,
-              private  _notification: NotificationService,
-              public i18n: I18n,
-              private modalService: BsModalService) {
-
-    this.text.Yes = i18n('Yes');
-    this.text.No = i18n('No');
+  constructor(
+    private sharingService: ShareService,
+    public galleryService: ContentService,
+    private notification: NotificationService,
+    private modalService: BsModalService
+  ) {
+    this.text.Yes = $localize`Yes`;
+    this.text.No = $localize`No`;
   }
 
-
-  ngOnInit() {
-    this.contentSubscription = this._galleryService.content.subscribe((content: ContentWrapper) => {
-      this.enabled = !!content.directory;
-      if (!this.enabled) {
-        return;
+  ngOnInit(): void {
+    this.contentSubscription = this.galleryService.content.subscribe(
+      (content: ContentWrapper) => {
+        this.enabled = !!content.directory;
+        if (!this.enabled) {
+          return;
+        }
+        this.currentDir = Utils.concatUrls(
+          content.directory.path,
+          content.directory.name
+        );
       }
-      this.currentDir = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
-    });
+    );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this.contentSubscription !== null) {
       this.contentSubscription.unsubscribe();
     }
   }
 
-  calcValidity() {
+  calcValidity(): number {
     switch (parseInt(this.input.valid.type.toString(), 10)) {
       case ValidityTypes.Minutes:
         return this.input.valid.amount * 1000 * 60;
@@ -81,27 +81,38 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
         return this.input.valid.amount * 1000 * 60 * 60 * 24;
       case ValidityTypes.Months:
         return this.input.valid.amount * 1000 * 60 * 60 * 24 * 30;
+      case ValidityTypes.Forever:
+        return -1;
     }
     throw new Error('unknown type: ' + this.input.valid.type);
   }
 
-  async update() {
+  async update(): Promise<void> {
     if (this.sharing == null) {
       return;
     }
-    this.url = this.i18n('loading..');
-    this.sharing = await this._sharingService.updateSharing(this.currentDir,
-      this.sharing.id, this.input.includeSubfolders, this.input.password, this.calcValidity());
+    this.url = $localize`loading..`;
+    this.sharing = await this.sharingService.updateSharing(
+      this.currentDir,
+      this.sharing.id,
+      this.input.includeSubfolders,
+      this.input.password,
+      this.calcValidity()
+    );
     this.url = Config.Client.publicUrl + '/share/' + this.sharing.sharingKey;
   }
 
-  async get() {
-    this.url = this.i18n('loading..');
-    this.sharing = await this._sharingService.createSharing(this.currentDir, this.input.includeSubfolders, this.calcValidity());
+  async get(): Promise<void> {
+    this.url = $localize`loading..`;
+    this.sharing = await this.sharingService.createSharing(
+      this.currentDir,
+      this.input.includeSubfolders,
+      this.calcValidity()
+    );
     this.url = Config.Client.publicUrl + '/share/' + this.sharing.sharingKey;
   }
 
-  async openModal(template: TemplateRef<any>) {
+  async openModal(template: TemplateRef<unknown>): Promise<void> {
     await this.get();
     this.input.password = '';
     if (this.modalRef) {
@@ -111,20 +122,18 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     document.body.style.paddingRight = '0px';
   }
 
-  onCopy() {
-    this._notification.success(this.i18n('Url has been copied to clipboard'));
+  onCopy(): void {
+    this.notification.success($localize`Url has been copied to clipboard`);
   }
 
-  public hideModal() {
+  public hideModal(): void {
     this.modalRef.hide();
     this.modalRef = null;
     this.sharing = null;
   }
-
-
 }
 
 
 export enum ValidityTypes {
-  Minutes = 1, Hours = 2, Days = 3, Months = 4
+  Minutes = 1, Hours = 2, Days = 3, Months = 4, Forever = 99
 }

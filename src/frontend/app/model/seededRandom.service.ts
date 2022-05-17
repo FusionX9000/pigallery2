@@ -1,8 +1,7 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable()
 export class SeededRandomService {
-
   private static readonly baseSeed = Math.random() * 2147483647;
   private seed: number;
 
@@ -14,13 +13,12 @@ export class SeededRandomService {
     }
   }
 
-  setSeed(seed: number) {
+  setSeed(seed: number): void {
     this.seed = (SeededRandomService.baseSeed + seed) % 2147483647; // shifting with 16 to the left
   }
 
-  get() {
-    this.seed = (this.seed * 16807 % 2147483647);
+  get(): number {
+    this.seed = (this.seed * 16807) % 2147483647;
     return this.seed / 2147483647;
   }
-
 }

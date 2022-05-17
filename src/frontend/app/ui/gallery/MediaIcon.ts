@@ -1,60 +1,88 @@
-import {Utils} from '../../../../common/Utils';
-import {Config} from '../../../../common/config/public/Config';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
+import { Utils } from '../../../../common/Utils';
+import { Config } from '../../../../common/config/public/Config';
+import { MediaDTO } from '../../../../common/entities/MediaDTO';
 
 export class MediaIcon {
-
+  protected static readonly ThumbnailMap =
+    Config.Client.Media.Thumbnail.generateThumbnailMap();
 
   protected replacementSizeCache: number | boolean = false;
 
-  constructor(public media: MediaDTO) {
-
-  }
+  constructor(public media: MediaDTO) {}
 
   getExtension(): string {
     return this.media.name.substr(this.media.name.lastIndexOf('.') + 1);
   }
 
-  iconLoaded() {
-    this.media.readyIcon = true;
+  iconLoaded(): void {
+    this.media.missingThumbnails -=
+      MediaIcon.ThumbnailMap[Config.Client.Media.Thumbnail.iconSize];
   }
 
-  isIconAvailable() {
-    return this.media.readyIcon;
+  isIconAvailable(): boolean {
+    // eslint-disable-next-line no-bitwise
+    return (
+      (this.media.missingThumbnails &
+        MediaIcon.ThumbnailMap[Config.Client.Media.Thumbnail.iconSize]) ===
+      0
+    );
   }
 
   getRelativePath(): string {
-    return Utils.concatUrls(this.media.directory.path, this.media.directory.name, this.media.name);
+    return (
+      encodeURI(
+        Utils.concatUrls(
+          this.media.directory.path,
+          this.media.directory.name,
+          this.media.name
+        )
+      )
+        // do not escape all urls with encodeURIComponent because that make the URL ugly and not needed
+        // do not escape before concatUrls as that would make prevent optimizations
+        // .replace(new RegExp('%', 'g'), '%25') // order important
+        .replace(new RegExp('#', 'g'), '%23')
+        .replace(new RegExp('\\$', 'g'), '%24')
+    );
   }
 
-  getIconPath() {
-    return Utils.concatUrls(Config.Client.urlBase,
+  getIconPath(): string {
+    return Utils.concatUrls(
+      Config.Client.urlBase,
       '/api/gallery/content/',
-      this.media.directory.path, this.media.directory.name, this.media.name, 'icon');
+      this.getRelativePath(),
+      'icon'
+    );
   }
 
-  getMediaPath() {
-    return Utils.concatUrls(Config.Client.urlBase,
+  getMediaPath(): string {
+    return Utils.concatUrls(
+      Config.Client.urlBase,
       '/api/gallery/content/',
-      this.media.directory.path, this.media.directory.name, this.media.name);
+      this.getRelativePath()
+    );
   }
 
-  getBestFitMediaPath() {
+  getBestFitMediaPath(): string {
     return Utils.concatUrls(this.getMediaPath(), '/bestFit');
   }
-
 
   equals(other: MediaDTO | MediaIcon): boolean {
     // is gridphoto
     if (other instanceof MediaIcon) {
-      return this.media.directory.path === other.media.directory.path &&
-        this.media.directory.name === other.media.directory.name && this.media.name === other.media.name;
+      return (
+        this.media.directory.path === other.media.directory.path &&
+        this.media.directory.name === other.media.directory.name &&
+        this.media.name === other.media.name
+      );
     }
 
     // is media
     if (other.directory) {
-      return this.media.directory.path === other.directory.path &&
-        this.media.directory.name === other.directory.name && this.media.name === other.name;
+      return (
+        this.media.directory.path === other.directory.path &&
+        this.media.directory.name === other.directory.name &&
+        this.media.name === other.name
+      );
     }
 
     return false;

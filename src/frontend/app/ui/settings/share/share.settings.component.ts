@@ -1,53 +1,62 @@
-import {Component, OnInit} from '@angular/core';
-import {SettingsComponent} from '../_abstract/abstract.settings.component';
-import {AuthenticationService} from '../../../model/network/authentication.service';
-import {NavigationService} from '../../../model/navigation.service';
-import {NotificationService} from '../../../model/notification.service';
-import {ShareSettingsService} from './share.settings.service';
-import {I18n} from '@ngx-translate/i18n-polyfill';
-import {ClientConfig} from '../../../../../common/config/public/ClientConfig';
-import {SharingDTO} from '../../../../../common/entities/SharingDTO';
+import { Component, OnInit } from '@angular/core';
+import { SettingsComponentDirective } from '../_abstract/abstract.settings.component';
+import { AuthenticationService } from '../../../model/network/authentication.service';
+import { NavigationService } from '../../../model/navigation.service';
+import { NotificationService } from '../../../model/notification.service';
+import { ShareSettingsService } from './share.settings.service';
+import { ClientSharingConfig } from '../../../../../common/config/public/ClientConfig';
+import { SharingDTO } from '../../../../../common/entities/SharingDTO';
 
 @Component({
   selector: 'app-settings-share',
   templateUrl: './share.settings.component.html',
-  styleUrls: ['./share.settings.component.css',
-    '../_abstract/abstract.settings.component.css'],
+  styleUrls: [
+    './share.settings.component.css',
+    '../_abstract/abstract.settings.component.css',
+  ],
   providers: [ShareSettingsService],
 })
-export class ShareSettingsComponent extends SettingsComponent<ClientConfig.SharingConfig, ShareSettingsService> implements OnInit {
-
-
+export class ShareSettingsComponent
+  extends SettingsComponentDirective<ClientSharingConfig, ShareSettingsService>
+  implements OnInit
+{
   public shares: SharingDTO[] = [];
 
-  constructor(_authService: AuthenticationService,
-              _navigation: NavigationService,
-              _settingsService: ShareSettingsService,
-              notification: NotificationService,
-              i18n: I18n) {
-    super(i18n('Share'), _authService, _navigation, _settingsService, notification, i18n, s => s.Client.Sharing);
+  constructor(
+    authService: AuthenticationService,
+    navigation: NavigationService,
+    settingsService: ShareSettingsService,
+    notification: NotificationService
+  ) {
+    super(
+      $localize`Share`,
+      'share',
+      authService,
+      navigation,
+      settingsService,
+      notification,
+      (s) => s.Client.Sharing
+    );
   }
 
-
-  ngOnInit() {
+  ngOnInit(): void {
     super.ngOnInit();
     this.getSharingList();
   }
 
-  async deleteSharing(sharing: SharingDTO) {
-    await this._settingsService.deleteSharing(sharing);
+  async deleteSharing(sharing: SharingDTO): Promise<void> {
+    await this.settingsService.deleteSharing(sharing);
     await this.getSharingList();
   }
 
-  private async getSharingList() {
+  private async getSharingList(): Promise<void> {
     try {
-      this.shares = await this._settingsService.getSharingList();
+      this.shares = await this.settingsService.getSharingList();
     } catch (err) {
       this.shares = [];
       throw err;
     }
   }
-
 }
 
 
