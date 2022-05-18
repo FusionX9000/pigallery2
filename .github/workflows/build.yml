@@ -2,7 +2,7 @@ name: docker-buildx
 on:
   pull_request:
     branches:
-      - master
+      - main
       - experimental
   push:
     branches:
@@ -134,16 +134,16 @@ jobs:
           file: docker/${{ matrix.container }}/Dockerfile.build
           platforms: ${{ matrix.platforms }}
           push: true
-          tags: bpatrik/pigallery2:experimental-${{ matrix.container }}
+          tags: fusionx/pigallery2:experimental-${{ matrix.container }}
       - name: Push nightly on new master commit
-        if: ${{ startsWith(steps.vars.outputs.type , 'head') &&  !github.event.issue.pull_request && github.ref == 'refs/heads/master' }}
+        if: ${{ startsWith(steps.vars.outputs.type , 'head') &&  !github.event.issue.pull_request && github.ref == 'refs/heads/main' }}
         uses: docker/build-push-action@v2
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build
           platforms: ${{ matrix.platforms }}
           push: true
-          tags: bpatrik/pigallery2:nightly-${{ matrix.container }}
+          tags: fusionx/pigallery2:nightly-${{ matrix.container }}
       - name: Push release on new Tag
         if: ${{ startsWith(steps.vars.outputs.type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container != 'debian-buster'}}
         uses: docker/build-push-action@v2
@@ -153,9 +153,9 @@ jobs:
           platforms: ${{ matrix.platforms }}
           push: true
           tags: |
-            bpatrik/pigallery2:nightly-${{ matrix.container }}
-            bpatrik/pigallery2:${{ steps.vars.outputs.tag }}-${{ matrix.container }}
-            bpatrik/pigallery2:latest-${{ matrix.container }}
+            fusionx/pigallery2:nightly-${{ matrix.container }}
+            fusionx/pigallery2:${{ steps.vars.outputs.tag }}-${{ matrix.container }}
+            fusionx/pigallery2:latest-${{ matrix.container }}
       - name: Push latest on new Tag
         if: ${{ startsWith(steps.vars.outputs.type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container == 'debian-buster'}}
         uses: docker/build-push-action@v2
@@ -165,8 +165,8 @@ jobs:
           platforms: ${{ matrix.platforms }}
           push: true
           tags: |
-            bpatrik/pigallery2:nightly-${{ matrix.container }}
-            bpatrik/pigallery2:${{ steps.vars.outputs.tag }}-${{ matrix.container }}
-            bpatrik/pigallery2:latest-${{ matrix.container }}
-            bpatrik/pigallery2:${{ steps.vars.outputs.tag }}
-            bpatrik/pigallery2:latest
+            fusionx/pigallery2:nightly-${{ matrix.container }}
+            fusionx/pigallery2:${{ steps.vars.outputs.tag }}-${{ matrix.container }}
+            fusionx/pigallery2:latest-${{ matrix.container }}
+            fusionx/pigallery2:${{ steps.vars.outputs.tag }}
+            fusionx/pigallery2:latest
